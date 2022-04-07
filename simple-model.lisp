@@ -3,34 +3,58 @@
 
    (sgp :mas 4 :act nil :esc t)
 
-  (chunk-type puzzle-state)
+  (chunk-type puzzle-state finished)
   (chunk-type landmark piece location type)
   (chunk-type goal state)
   (chunk-type action piece location)
 
+  (P completed "optional comment string"
+    =imaginal>
+      finished t
+    =goal>
+      isa goal
+      state choose-landmark
+    ==>
+    =imaginal>
+    =goal>
+     state completed
+  )
+
   (P retrieve-simple-landmark "optional comment string"
     =imaginal>
+      - finished t
     =goal>
       isa goal
       state choose-landmark
     ?retrieval>
-      state free
+       state free
+
     ==>
+    =imaginal>
     +retrieval>
       isa landmark
-      type simple
+      - type nil
+      ;;type =type ;; not used currently
+      :recently-retrieved nil
+     =goal>
+       state ret-to-goal
   )
 
   (P retrieve-complex-landmark "optional comment string"
     =imaginal>
+      - finished t
     =goal>
-      state choose-c-landmark ;; don't use it now
+      state choose-complex-landmark ;; not using it
     ?retrieval>
       state free
     ==>
+    =imaginal>
     +retrieval>
       isa landmark
       type complex
+      :recently-retrieved nil
+    =goal>
+       state ret-to-goal
   )
 
   (P landmark-to-goal "optional comment string"
@@ -38,9 +62,10 @@
       ISA  landmark
 
     =goal>
-      state choose-landmark
+      state ret-to-goal
     ==>
-    =goal>  =retrieval
+
+    +goal>  =retrieval
 
     )
 
@@ -48,6 +73,7 @@
   (P decide-action
     =goal>
       ISA  landmark
+      - piece ERROR
       piece =p
       location =l
       type =t
@@ -55,6 +81,8 @@
       state free
 
     ==>
+    !output! =p
+    !output! =l
     +imaginal>
       ISA  action
       piece =p
@@ -65,6 +93,22 @@
       state act
     )
 
+  (p decide-backtrack
+    =goal>
+      isa   landmark
+      piece error
+      piece =val
+    ?imaginal>
+      state free
+    ==>
+    !output! BACKTRACK
+    !bind! =new-state ("backtrack" =val)
+    ;;=imaginal>
+    +goal>
+      isa goal
+      state choose-landmark
+  )
+
   (P update "optional comment string"
     =imaginal>
       ISA  action
@@ -74,13 +118,13 @@
     =goal>
       state act
     ==>
-    !bind! =new-state ("update-state" (list =p =l =t))
+    !bind! =new-state ("update" =p =l)
     ;;+imaginal> =new-state
     =imaginal>
-    =goal>
+    +goal>
       isa goal
-      state end
-      ;;state choose-landmark
+      ;;state end
+      state choose-landmark
 
     )
 
