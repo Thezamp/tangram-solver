@@ -20,7 +20,7 @@ class Landmark:
             to the landmark
 
     """
-    def __init__(self, name, piece, location, type):
+    def __init__(self, name, piece, location, type, add_to_dm = True):
         self.name = name
         self.piece = piece
         self.location = location
@@ -28,7 +28,8 @@ class Landmark:
         self.triggers = []
         self.removes = [self]
         self.chunk_def = [name, "isa", "landmark", "piece", self.piece, "location", self.location, "type", self.type]
-        actr.add_dm(self.chunk_def)
+        if add_to_dm:
+            actr.add_dm(self.chunk_def)
 
     def add_triggers(self, tlist):
         self.triggers = tlist

@@ -9,16 +9,18 @@ def generate_monk_ldm():
     face = Landmark("SQ-FACE", "SQUARE", "FACE", 'SIMPLE')
     arm = Landmark("PG-ARM", 'PARALL', 'ARM', 'SIMPLE')
     foot = Landmark("ST-FOOT", 'SMALL-T', 'FOOT', 'SIMPLE')
-    body = Landmark("BODY", "NONE", "BODY", 'COMPLEX')
+    body = Landmark("BODY", "NONE", "BODY", 'SIMPLE') #NEED A DIFFERENT WAY TO SOLVE COMPLEX VS SIMPLE
     #######
     belly = Landmark('BT-BELLY', 'BIG-T', 'BELLY', 'SIMPLE')
-    neck = Landmark('BT-NECK', 'BIG-T', 'NECK', 'SIMPLE')
+    #neck = Landmark('BT-NECK', 'BIG-T', 'NECK', 'SIMPLE')
     knee = Landmark('MT-KNEE', 'MEDIUM-T', 'KNEE', 'SIMPLE')
     upperbody = Landmark('BT-UPPER', 'BIG-T', 'UPPER', 'SIMPLE')
     lowerbody = Landmark('BT-LOWER', 'BIG-T', 'LOWER', 'SIMPLE')
-    bottom = Landmark('MT-LOWER', 'MEDIUM-T', 'LOWER', 'SIMPLE')
-    leg = Landmark('BT-KNEE', 'BIG-T', 'KNEE', 'SIMPLE')
-    error = Landmark('LANDMARK-ERROR', 'ERROR', 'ERROR', 'SIMPLE')
+    #bottom = Landmark('MT-LOWER', 'MEDIUM-T', 'LOWER', 'SIMPLE')
+    #leg = Landmark('BT-KNEE', 'BIG-T', 'KNEE', 'SIMPLE')
+    #error = Landmark('ERROR-NOTICED', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR')
+    error = Landmark('LDM-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR',False)
+
 
     # simple "deterministic"version
     body.add_triggers([belly, upperbody, lowerbody, knee])
@@ -73,6 +75,7 @@ class Monk():
 
         actr.reset()
         actr.load_act_r_model(path)
+
         actr.add_command("update", self.update)
         actr.add_command("backtrack", self.backtrack)
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
@@ -82,7 +85,10 @@ class Monk():
         self.last_placed = []
         list_to_imaginal(self.active_landmarks)
 
+
     def update(self, piece, location):
+
+        print(f'action taken: {piece} at {location}')
 
         used_ldm = [l for l in self.active_landmarks if l.is_involved(piece, location)]
 
@@ -103,15 +109,16 @@ class Monk():
 
     def backtrack(self, useless_param):
 
+
         last = self.last_placed.pop(-1)
         print(f'backtracking: {last.name}')
-        print([l.name for l in last.get_removes()])
+        #print([l.name for l in last.get_removes()])
         self.active_landmarks = [ldm for ldm in self.active_landmarks if ldm not in last.get_triggers()]
         self.active_landmarks.extend(last.get_removes())
         self.active_landmarks.append(last)
 
-        print(last.get_removes())
-        print(self.active_landmarks)
+        #print(last.get_removes())
+        #print(self.active_landmarks)
         list_to_imaginal(self.active_landmarks)
         return True
 

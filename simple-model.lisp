@@ -1,12 +1,16 @@
 ;;(clear-all)
 (define-model simple-monk
 
-   (sgp :mas 4 :act nil :esc t)
+   (sgp :mas 7 :act nil :esc t)
+   (sgp :model-warnings nil)
+   (sgp :v nil)
+   (sgp :ans 0.2) ;;noise
 
   (chunk-type puzzle-state finished)
   (chunk-type landmark piece location type)
   (chunk-type goal state)
   (chunk-type action piece location)
+  (add-dm (LDM-ERROR isa landmark piece LANDMARK-ERROR location LANDMARK-ERROR type LANDMARK-ERROR))
 
   (P completed "matches when no landmarks are visible"
     =imaginal>
@@ -19,6 +23,25 @@
     =goal>
      state completed
   )
+
+  (p notice-error "retrieves error landmark"
+   =imaginal>
+     - finished t
+     LDM-ERROR LDM-ERROR
+   =goal>
+     isa goal
+     state choose-landmark
+   ?retrieval>
+      state free
+
+   ==>
+   =imaginal>
+   +retrieval>
+     isa landmark
+     type LANDMARK-ERROR
+    =goal>
+      state ret-to-goal
+ )
 
   (P retrieve-simple-landmark "retrieves one of the landmark using activation from imaginal"
     =imaginal>
@@ -33,29 +56,15 @@
     =imaginal>
     +retrieval>
       isa landmark
-      - type nil
+      type SIMPLE
       ;;type =type ;; not used currently
       :recently-retrieved nil
      =goal>
        state ret-to-goal
   )
 
-  (P retrieve-complex-landmark "currently not used"
-    =imaginal>
-      - finished t
-    =goal>
-      state choose-complex-landmark ;; not using it
-    ?retrieval>
-      state free
-    ==>
-    =imaginal>
-    +retrieval>
-      isa landmark
-      type complex
-      :recently-retrieved nil
-    =goal>
-       state ret-to-goal
-  )
+  (spp notice-error :u 5)
+  (spp retrieve-simple-landmark :u 2)
 
   (P landmark-to-goal "the chosen landmark gets into the goal buffer"
     =retrieval>
@@ -73,7 +82,7 @@
   (P decide-action "creates an action for the chosen landmark"
     =goal>
       ISA  landmark
-      - piece ERROR
+      - piece LANDMARK-ERROR
       piece =p
       location =l
       type =t
@@ -96,7 +105,7 @@
   (p decide-backtrack "if an error landmark is found,backtrack"
     =goal>
       isa   landmark
-      piece error
+      piece LANDMARK-ERROR
       piece =val
     ?imaginal>
       state free
