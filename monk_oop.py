@@ -52,6 +52,23 @@ def list_to_imaginal(ldm_list):
 
 
 class Monk():
+    """Represents puzzle n4, the monk
+
+    Attributes:
+          active_landmarks: landmarks currently visibile
+          active_pieces: pieces currently not used (to be added later)
+          last_placed: list of previous used landmarks for backtrack
+
+    Methods:
+          update:
+          given a landmark description, changes the state
+
+          backtrack:
+          removes the last landmark (probably will need changing)
+
+          run:
+          runs the actr model
+    """
     def __init__(self, path= "ACT-R:tangram-solver;simple-model.lisp"):
 
         actr.reset()
@@ -66,15 +83,14 @@ class Monk():
         list_to_imaginal(self.active_landmarks)
 
     def update(self, piece, location):
-        # print(piece)
-        # print(location)
+
         used_ldm = [l for l in self.active_landmarks if l.is_involved(piece, location)]
-        # print(used_ldm)
+
         used_ldm = used_ldm[0]
         self.active_landmarks.remove(used_ldm)  # maybe not needed
         self.active_landmarks.extend(used_ldm.get_triggers())
         self.active_landmarks = [ldm for ldm in self.active_landmarks if ldm not in used_ldm.get_removes()]
-        # print(self.active_landmarks)
+
         if len(self.active_landmarks) == 0:
             print("stop")
             imaginal_chunk = actr.define_chunks(['isa', 'puzzle-state', 'finished', 't'])

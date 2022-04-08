@@ -2,6 +2,24 @@ import actr
 
 
 class Landmark:
+    """ Represent a perceived landmark, defined as an
+    "interesting"placement of a tan
+
+    Attributes:
+        name: name of the landmark (and the chunk in actr)
+        piece: the tan involved
+        location: where the tan would be placed
+        type: distinction simple/complex, will be used later to
+            better define strategies
+        triggers: other landmarks that will appear once this is chosen
+        removes: other landmarks that are incompatible
+        chunk_def: the string-list used to define the act-r chunk
+
+    Methods:
+        is_involved: returns true if the suggested placement corresponds
+            to the landmark
+
+    """
     def __init__(self, name, piece, location, type):
         self.name = name
         self.piece = piece

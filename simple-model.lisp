@@ -8,7 +8,7 @@
   (chunk-type goal state)
   (chunk-type action piece location)
 
-  (P completed "optional comment string"
+  (P completed "matches when no landmarks are visible"
     =imaginal>
       finished t
     =goal>
@@ -20,7 +20,7 @@
      state completed
   )
 
-  (P retrieve-simple-landmark "optional comment string"
+  (P retrieve-simple-landmark "retrieves one of the landmark using activation from imaginal"
     =imaginal>
       - finished t
     =goal>
@@ -40,7 +40,7 @@
        state ret-to-goal
   )
 
-  (P retrieve-complex-landmark "optional comment string"
+  (P retrieve-complex-landmark "currently not used"
     =imaginal>
       - finished t
     =goal>
@@ -57,7 +57,7 @@
        state ret-to-goal
   )
 
-  (P landmark-to-goal "optional comment string"
+  (P landmark-to-goal "the chosen landmark gets into the goal buffer"
     =retrieval>
       ISA  landmark
 
@@ -70,7 +70,7 @@
     )
 
 ;; "maybe add retrieval steps for errors in pieces and loc"
-  (P decide-action
+  (P decide-action "creates an action for the chosen landmark"
     =goal>
       ISA  landmark
       - piece ERROR
@@ -93,7 +93,7 @@
       state act
     )
 
-  (p decide-backtrack
+  (p decide-backtrack "if an error landmark is found,backtrack"
     =goal>
       isa   landmark
       piece error
@@ -103,13 +103,14 @@
     ==>
     !output! BACKTRACK
     !bind! =new-state ("backtrack" =val)
-    ;;=imaginal>
+    ;;likely enough to eval, but possibly create the imaginal chunk here in the
+    ;;future
     +goal>
       isa goal
       state choose-landmark
   )
 
-  (P update "optional comment string"
+  (P update "If an action is chosen, the state is updated accordingly"
     =imaginal>
       ISA  action
       piece =p
@@ -119,11 +120,10 @@
       state act
     ==>
     !bind! =new-state ("update" =p =l)
-    ;;+imaginal> =new-state
+    ;;same reasoning of the backtrack prduction
     =imaginal>
     +goal>
       isa goal
-      ;;state end
       state choose-landmark
 
     )
