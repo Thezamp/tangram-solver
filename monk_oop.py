@@ -52,7 +52,7 @@ def list_to_imaginal(ldm_list):
 
 
 class Monk():
-    def __init__(self, path):
+    def __init__(self, path= "ACT-R:tangram-solver;simple-model.lisp"):
 
         actr.reset()
         actr.load_act_r_model(path)
