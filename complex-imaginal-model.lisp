@@ -5,6 +5,7 @@
    (sgp :model-warnings nil)
    (sgp :v nil)
    (sgp :ans 0.2) ;;noise
+   ;;(sgp :rt 1) ;;retrieval threshold
 
   (chunk-type puzzle-state pieces-remain)
   (chunk-type landmark piece location type)
