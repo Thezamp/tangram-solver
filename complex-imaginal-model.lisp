@@ -6,7 +6,7 @@
    (sgp :v nil)
    (sgp :ans 0.2) ;;noise
 
-  (chunk-type puzzle-state finished)
+  (chunk-type puzzle-state pieces-remain)
   (chunk-type landmark piece location type)
   (chunk-type goal state)
   (chunk-type action piece location)
@@ -14,7 +14,7 @@
 
   (P completed "matches when no landmarks are visible"
     =imaginal>
-      finished t
+      pieces-remain nil
     =goal>
       isa goal
       state choose-landmark
@@ -24,29 +24,9 @@
      state completed
   )
 
-  (p notice-error "retrieves error landmark"
-   =imaginal>
-     - finished t
-     LDM-ERROR LDM-ERROR
-   =goal>
-     isa goal
-     state choose-landmark
-   ?retrieval>
-      state free
-
-   ==>
-   =imaginal>
-   +retrieval>
-     isa landmark
-     type LANDMARK-ERROR
-    =goal>
-      state ret-to-goal
- )
-
-  (P retrieve-simple-landmark "retrieves one of the landmark using activation from imaginal"
+  (P retrieve-simple-landmark "retrieves one of the landmarks using activation from imaginal"
     =imaginal>
-      - finished t
-      LDM-ERROR NIL
+      pieces-remain t
     =goal>
       isa goal
       state choose-landmark
@@ -64,97 +44,57 @@
        state ret-to-goal
   )
 
+  (p notice-error-and-backtrack "there are pieces left but no landmark"
+   =imaginal>
+     pieces-remain t
+
+   =goal>
+     isa goal
+     state ret-to-goal
+   ?retrieval>
+      buffer failure
+
+   ==>
+   !output! BACKTRACK
+   !bind! =new-state ("backtrack" =val)
+
+   +goal>
+     isa goal
+     state choose-landmark
+ )
+
+ (P landmark-to-goal "a possible landmark is found, set it as goal"
+   =retrieval>
+     ISA  landmark
+
+   =goal>
+     state ret-to-goal
+   ==>
+
+   +goal>  =retrieval
+
+   )
+
   ;;(spp notice-error :u 5)
   ;;(spp retrieve-simple-landmark :u 2)
 
-  (P landmark-to-goal "the chosen landmark gets into the goal buffer"
-    =retrieval>
-      ISA  landmark
 
+
+  (P act-and-update "creates an action for the chosen landmark"
     =goal>
-      state ret-to-goal
-    ==>
-
-    +goal>  =retrieval
-
-    )
-
-;; "maybe add retrieval steps for errors in pieces and loc"
-  (P decide-action "creates an action for the chosen landmark"
-    =goal>
-      state placeholder
       ISA  landmark
-      - piece LANDMARK-ERROR
       piece =p
       location =l
-      type =t
-    ?imaginal>
-      state free
 
     ==>
     !output! =p
     !output! =l
-    +imaginal>
-      ISA  action
-      piece =p
-      location =l
-      type =t
-    +goal>
-      isa goal
-      state act
-    )
+    !bind! =new-state ("update" =p =l)
 
-    (P act-and-update "creates an action for the chosen landmark"
-      =goal>
-        ISA  landmark
-        - piece LANDMARK-ERROR
-        piece =p
-        location =l
-        ;;type =t
-
-      ==>
-      !output! =p
-      !output! =l
-      !bind! =new-state ("update" =p =l)
-
-      +goal>
-        isa goal
-        state choose-landmark
-    )
-
-  (p decide-backtrack "if an error landmark is found,backtrack"
-    =goal>
-      isa   landmark
-      piece LANDMARK-ERROR
-      piece =val
-    ?imaginal>
-      state free
-    ==>
-    !output! BACKTRACK
-    !bind! =new-state ("backtrack" =val)
-    ;;likely enough to eval, but possibly create the imaginal chunk here in the
-    ;;future
     +goal>
       isa goal
       state choose-landmark
   )
 
-  (P update "If an action is chosen, the state is updated accordingly"
-    =imaginal>
-      ISA  action
-      piece =p
-      location =l
-      type =t
-    =goal>
-      state act
-    ==>
-    !bind! =new-state ("update" =p =l)
-    ;;same reasoning of the backtrack prduction
-    =imaginal>
-    +goal>
-      isa goal
-      state choose-landmark
-
-    )
 
 )
