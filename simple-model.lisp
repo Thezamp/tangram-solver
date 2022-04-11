@@ -1,4 +1,4 @@
-;;(clear-all)
+(clear-all)
 (define-model simple-monk
 
    (sgp :mas 7 :act nil :esc t)
@@ -46,6 +46,7 @@
   (P retrieve-simple-landmark "retrieves one of the landmark using activation from imaginal"
     =imaginal>
       - finished t
+      LDM-ERROR NIL
     =goal>
       isa goal
       state choose-landmark
@@ -63,8 +64,8 @@
        state ret-to-goal
   )
 
-  (spp notice-error :u 5)
-  (spp retrieve-simple-landmark :u 2)
+  ;;(spp notice-error :u 5)
+  ;;(spp retrieve-simple-landmark :u 2)
 
   (P landmark-to-goal "the chosen landmark gets into the goal buffer"
     =retrieval>
@@ -81,6 +82,7 @@
 ;; "maybe add retrieval steps for errors in pieces and loc"
   (P decide-action "creates an action for the chosen landmark"
     =goal>
+      state placeholder
       ISA  landmark
       - piece LANDMARK-ERROR
       piece =p
@@ -100,6 +102,24 @@
     +goal>
       isa goal
       state act
+    )
+
+    (P act-and-update "creates an action for the chosen landmark"
+      =goal>
+        ISA  landmark
+        - piece LANDMARK-ERROR
+        piece =p
+        location =l
+        ;;type =t
+
+      ==>
+      !output! =p
+      !output! =l
+      !bind! =new-state ("update" =p =l)
+
+      +goal>
+        isa goal
+        state choose-landmark
     )
 
   (p decide-backtrack "if an error landmark is found,backtrack"

@@ -19,7 +19,7 @@ def generate_monk_ldm():
     #bottom = Landmark('MT-LOWER', 'MEDIUM-T', 'LOWER', 'SIMPLE')
     #leg = Landmark('BT-KNEE', 'BIG-T', 'KNEE', 'SIMPLE')
     #error = Landmark('ERROR-NOTICED', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR')
-    error = Landmark('LDM-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR',False)
+    error = Landmark('LDM-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR',False) #don't put in dm
 
 
     # simple "deterministic"version
