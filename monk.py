@@ -1,67 +1,49 @@
 import actr
-import random
-
-actr.load_act_r_model("ACT-R:tangram-solver;simple-model.lisp")
-
-
-def create_landmark_entry(piece, location, type):
-    ldm = {"piece": str.capitalize(piece), "location": str.capitalize(location), "type": str.capitalize(type)}
-    return ldm
+from landmark import Landmark
+from puzzle import Puzzle, list_to_imaginal
 
 
-def dict_to_chunk_landmark(name, dict):
-    chunk = [name, "isa", "landmark"]
-    for k in dict.keys():
-        chunk.append(k)
-        chunk.append(dict.get(k))
-    return chunk
+def generate_monk_ldm():
+    hat = Landmark("ST-HAT", "SMALL-T", "HAT", "SIMPLE")
+    face = Landmark("SQ-FACE", "SQUARE", "FACE", 'SIMPLE')
+    arm = Landmark("PG-ARM", 'PARALL', 'ARM', 'SIMPLE')
+    foot = Landmark("ST-FOOT", 'SMALL-T', 'FOOT', 'SIMPLE')
+    body = Landmark("BODY", "NONE", "BODY", 'SIMPLE')  # NEED A DIFFERENT WAY TO SOLVE COMPLEX VS SIMPLE
+    #######
+    belly = Landmark('BT-BELLY', 'BIG-T', 'BELLY', 'SIMPLE')
+    # neck = Landmark('BT-NECK', 'BIG-T', 'NECK', 'SIMPLE')
+    knee = Landmark('MT-KNEE', 'MEDIUM-T', 'KNEE', 'SIMPLE')
+    upperbody = Landmark('BT-UPPER', 'BIG-T', 'UPPER', 'SIMPLE')
+    lowerbody = Landmark('BT-LOWER', 'BIG-T', 'LOWER', 'SIMPLE')
+    # bottom = Landmark('MT-LOWER', 'MEDIUM-T', 'LOWER', 'SIMPLE')
+    # leg = Landmark('BT-KNEE', 'BIG-T', 'KNEE', 'SIMPLE')
+    # error = Landmark('ERROR-NOTICED', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR')
+    error = Landmark('LDM-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', False)  # don't put in dm
+
+    # simple "deterministic"version
+    body.add_triggers([belly, upperbody, lowerbody, knee])
+    belly.add_removes([upperbody, lowerbody])
+    belly.add_triggers([error])
+    upperbody.add_removes([belly])
+    lowerbody.add_removes([belly])
+    # body.add_triggers([belly, neck, knee, upperbody, lowebody, bottom, leg])
+    # belly.add_removes([neck,upperbody,lowerbody,leg,bottom])
+    # belly.add_triggers([error])
+    # neck.add_removes([belly,upperbody,lowerbody,bottom])
+    # neck.add_triggers([error])
+    # knee.add_removes([leg,bottom])
+
+    active = [hat, face, arm, foot, body]
+    # active = [hat, face, arm, foot]
+    # unseen = [belly, neck, knee, upperbody, lowerbody, bottom, leg,error]
+    # currently not using unseen
+    unseen = [belly, upperbody, lowerbody, knee, error]
+
+    return active, unseen
 
 
-def monk_puzzle():
-    def update_state(list):
-        for lkey in state_dict.keys():
-            ldm = state_dict.get(lkey)
-            if ldm.get("piece") == list[0] and ldm.get("location") == list[1]:
-                print("FOUND")
-                break
-        del state_dict[lkey]
-
-        state_def = ['isa', 'puzzle-state']
-        for landmark in state_dict.keys():
-            state_def.append(landmark)
-            state_def.append(landmark)
-        print(state_def)
-        imaginal_update = actr.define_chunks(state_def)
-        actr.set_buffer_chunk('imaginal', imaginal_start)
-        #actr.set_buffer_chunk('imaginal',actr.define_chunks(state_def))
-        #return actr.define_chunks(state_def)
-        return True
-
-    actr.reset()
-    actr.add_command("update-state",update_state)
-    # this will be the python representation
-    state_dict = {"landmark1": create_landmark_entry("small-triangle", "head", "simple"),
-                  "landmark2": create_landmark_entry("square", "head", "simple"),
-                  "landmark3": create_landmark_entry("parallelogram", "arm", "simple"),
-                  "landmark4": create_landmark_entry("small-triangle", "foot", "simple"),
-                  "landmark5": create_landmark_entry("nil", "body", "complex")}
-
-    state_def = ['isa', 'puzzle-state']
-    for landmark in state_dict.keys():
-        # ldm_chunk = actr.define_chunks(dict_to_chunk_landmark(landmark,state_dict.get(landmark)))
-        actr.add_dm(dict_to_chunk_landmark(landmark, state_dict.get(landmark)))
-
-        state_def.append(landmark)
-        state_def.append(landmark)
-    #    print()
-
-    imaginal_start = actr.define_chunks(state_def)
-    actr.set_buffer_chunk('imaginal', imaginal_start)
-    actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
-    actr.goal_focus('start')
-    # actr.run(10)
-    return
-
-
-if __name__ == "__main__":
-    monk_puzzle()
+class Monk(Puzzle):
+    def __init__(self, path= "ACT-R:tangram-solver;simple-model.lisp"):
+        super().__init__(path)
+        self.active_landmarks, self.unseen_landmarks = generate_monk_ldm()
+        list_to_imaginal(self.active_landmarks)

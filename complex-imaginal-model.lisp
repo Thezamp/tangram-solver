@@ -11,9 +11,10 @@
   (chunk-type landmark piece location type)
   (chunk-type goal state)
   (chunk-type action piece location)
-  (add-dm (LDM-ERROR isa landmark piece LANDMARK-ERROR location LANDMARK-ERROR type LANDMARK-ERROR))
-
-  (P completed "matches when no landmarks are visible"
+  (add-dm (UNF-REGION isa landmark piece LANDMARK-UNF location LANDMARK-UNF type UNFEASIBLE))
+  (sdp UNF-REGION :base-level 0.5)
+  
+  (P completed "matches when no tans re left"
     =imaginal>
       pieces-remain nil
     =goal>
@@ -25,7 +26,7 @@
      state completed
   )
 
-  (P retrieve-simple-landmark "retrieves one of the landmarks using activation from imaginal"
+  (P retrieve-landmark "retrieves one of the landmarks using activation from imaginal"
     =imaginal>
       pieces-remain t
     =goal>
@@ -38,11 +39,9 @@
     =imaginal>
     +retrieval>
       isa landmark
-      type SIMPLE
-      ;;type =type ;; not used currently
       :recently-retrieved nil
      =goal>
-       state ret-to-goal
+       state ldm-chosen
   )
 
   (p notice-error-and-backtrack "there are pieces left but no landmark"
@@ -51,7 +50,7 @@
 
    =goal>
      isa goal
-     state ret-to-goal
+     state ldm-chosen
    ?retrieval>
       buffer failure
 
