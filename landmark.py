@@ -22,12 +22,12 @@ class Landmark:
     """
     def __init__(self, name, piece, location, type, add_to_dm = True):
         self.name = name
-        self.piece = piece
+        self.piece_type = piece
         self.location = location
         self.type = type
         self.triggers = []
         self.removes = [self]
-        self.chunk_def = [name, "isa", "landmark", "piece", self.piece, "location", self.location, "type", self.type]
+        self.chunk_def = [name, "isa", "landmark", "piece", self.piece_type, "location", self.location, "type", self.type]
         if add_to_dm:
             actr.add_dm(self.chunk_def)
 
@@ -44,6 +44,6 @@ class Landmark:
         return self.removes
 
     def is_involved(self, piece, location):
-        if self.piece == piece and self.location==location:
+        if self.piece_type == piece and self.location==location:
             return True
         return False

@@ -1,6 +1,5 @@
-import actr
 from landmark import Landmark
-from puzzle import Puzzle, list_to_imaginal
+from old_files.puzzle import Puzzle, list_to_imaginal
 
 
 def generate_monk_ldm():
@@ -43,7 +42,7 @@ def generate_monk_ldm():
 
 
 class Monk(Puzzle):
-    def __init__(self, path= "ACT-R:tangram-solver;simple-model.lisp"):
+    def __init__(self, path= "ACT-R:tangram-solver;models;simple-model.lisp"):
         super().__init__(path)
         self.active_landmarks, self.unseen_landmarks = generate_monk_ldm()
         list_to_imaginal(self.active_landmarks)

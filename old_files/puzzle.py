@@ -13,7 +13,7 @@ def list_to_imaginal(ldm_list):
 
 class Puzzle():
 
-    def __init__(self, generator, path= "ACT-R:tangram-solver;simple-model.lisp"):
+    def __init__(self, path= "ACT-R:tangram-solver;models;simple-model.lisp"):
 
         actr.reset()
         actr.load_act_r_model(path)

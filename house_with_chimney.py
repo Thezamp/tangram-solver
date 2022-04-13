@@ -1,6 +1,5 @@
-import actr
 from landmark import Landmark
-from puzzle import Puzzle, list_to_imaginal
+from old_files.puzzle import Puzzle, list_to_imaginal
 
 def generate_house_with_chimney_landmarks():
     chimney = Landmark("SQ-CHIMNEY",'SQUARE','CHIMNEY','STRONG')
@@ -27,7 +26,7 @@ def generate_house_with_chimney_landmarks():
     big_t_roof_left = Landmark('BIG-T-ROOF-LEFT','BIG-T','ROOF-LEFT', 'WEAK')
     small_t_chimney_high = Landmark('SMALL-T-CHIMNEY-HIGH','SMALL-T','CHIMNEY','WEAK') #PROBABLY WORKS
     small_t_chimney_low = Landmark('SMALL-T-CHIMNEY-LOW','SMALL-T','CHIMNEY','WEAK')
-
+    error = Landmark('LDM-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', 'LANDMARK-ERROR', False)
     #####triggers and removes
     chimney.add_removes([small_t_chimney_low,small_t_chimney_high])
     chimney.add_triggers([roof_left])
@@ -43,7 +42,22 @@ def generate_house_with_chimney_landmarks():
                                   mid_t_right_point,small_t_left_point,small_t_left_comb_up,small_t_left_comb_down])
     mid_t_right_point.add_removes([big_t_low_right_corner,
                                    mid_t_left_point,small_t_right_point,small_t_right_comb_up,small_t_right_comb_down])
-    #small_t_left_point.add_removes([small_t_right_comb_up,small_t_left_comb_down,mid_t_right_point])
+    small_t_left_point.add_removes([big_t_low_left_corner,
+                                    small_t_left_comb_up,small_t_left_comb_down,mid_t_left_point])
+    small_t_left_point.add_triggers([error])
+    small_t_right_point.add_removes([big_t_low_right_corner,
+                                     small_t_right_comb_up,small_t_right_comb_down,mid_t_right_point])
+    small_t_right_point.add_triggers([error])
+
+    small_t_left_comb_up.add_removes([small_t_left_point,mid_t_left_point,big_t_low_left_corner])
+    small_t_left_comb_down.add_removes([small_t_left_point,mid_t_left_point,big_t_low_left_corner])
+
+    small_t_right_comb_up.add_removes([small_t_right_point,mid_t_right_point,big_t_low_right_corner])
+    small_t_right_comb_down.add_removes([small_t_right_point,mid_t_right_point,big_t_low_right_corner])
+
+    big_t_low_left_corner.add_removes([roof_left,wall_up,wall_down,mid_t_left_point,small_t_left_point,
+                                       small_t_left_comb_up,small_t_left_comb_down,big_t_low_right_corner,
+                                       big_t_roof_left])
     pass
 
 
