@@ -71,7 +71,7 @@
             piece-type =p
             location =l
         ==>
-        !eval! ("get-pieces") ;;update the imaginal buffer
+        !bind! =res ("get-pieces") ;;update the imaginal buffer
         +goal>
             isa landmark-goal
             state search
@@ -85,7 +85,7 @@
             state search
             piece-type UNF-REGION
         ==>
-        !eval! ("region-backtrack")
+        !bind! =res ("region-backtrack")
         +goal>
             isa process-goal
             state choose-landmark
@@ -122,7 +122,7 @@
           piece-type =p
           location =l
       ==>
-      !eval! ("update" =p =l)
+      !bind! =res ("update" =p =l)
       +goal>
           isa process-goal
           state choose-landmark
@@ -137,7 +137,7 @@
         =imaginal> ;; pieces of that type are left
             =p nil
         ==>
-        !eval! ("piece-backtrack")
+        !bind! =res ("piece-backtrack")
         +goal>
             isa process-goal
             state choose-landmark
@@ -150,7 +150,7 @@
         =goal>
             state free
         ==>
-        !eval! ("piece-backtrack")
+        !bind! =res ("piece-backtrack")
         +goal>
             isa process-goal
             state choose-landmark
@@ -167,7 +167,7 @@
             isa piece
             type =p
         ==>
-        !eval! ("update" =p =l)
+        !bind! =res ("update" =p =l)
         ;;!bind! =new ("update" =p =l)
         +goal>
             isa process-goal
@@ -183,7 +183,7 @@
         =retrieval>
             buffer  failure
         ==>
-        !eval! ("piece-backtrack")
+        !bind! =res ("piece-backtrack")
         +goal>
             isa process-goal
             state choose-landmark
@@ -197,7 +197,7 @@
         =retrieval>
             buffer  failure
         ==>
-        !eval! ("piece-backtrack")
+        !bind! =res ("piece-backtrack")
         +goal>
             isa process-goal
             state choose-landmark

@@ -36,7 +36,7 @@ class Puzzle():
         print(f'action taken: {piece} at {location}')
 
         #works only if landmarks are unique
-        used_ldm = next(l for l in self.active_landmarks if l.is_involved(piece,location))
+        used_ldm = [l for l in self.active_landmarks if l.is_involved(piece,location)][0]
         #update the landmark_state
         self.active_landmarks.remove(used_ldm)  # maybe not needed
         self.active_landmarks.update(set(used_ldm.get_triggers()))
@@ -80,15 +80,20 @@ class Puzzle():
         puzzle_state_to_imaginal(self.active_landmarks)
         # ADD THE PIECE BACK
         self.available_pieces.append(ldm.piece_type)
+        return True
 
     def get_pieces(self):
         state_def= ['isa', 'piece-state']
+        print('get pieces triggereds')
         for p in set(self.available_pieces):
+            print(p)
             state_def.append(p)
             state_def.append('t')
         imaginal_chunk = actr.define_chunks(state_def)
         actr.set_buffer_chunk('imaginal', imaginal_chunk)
+        return True
 
     def run(self, time=10):
+
         actr.goal_focus('start')
         actr.run(time)

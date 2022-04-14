@@ -31,7 +31,7 @@ def generate_monk_ldm(unf_region_ldm):
     # neck.add_triggers([error])
     # knee.add_removes([leg,bottom])
 
-    active = set([hat, face, arm, foot, body])
+    active = {hat, face, arm, foot, body}
     # active = [hat, face, arm, foot]
     # unseen = [belly, neck, knee, upperbody, lowerbody, bottom, leg,error]
     # currently not using unseen
@@ -45,3 +45,12 @@ class Monk(Puzzle):
         super().__init__(path)
         self.active_landmarks, self.unseen_landmarks = generate_monk_ldm(self.unfeasible_ldm)
         puzzle_state_to_imaginal(self.active_landmarks)
+
+
+def main():
+    m = Monk()
+    print('start')
+    m.run(10)
+
+if __name__ == "__main__":
+    main()
