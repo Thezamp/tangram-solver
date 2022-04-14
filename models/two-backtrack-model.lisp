@@ -1,18 +1,20 @@
-(clear-all)
+ (clear-all)
 (define-model two-backtrack
     (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
     (sgp :model-warnings nil)
     (sgp :v t) ;; trace
     (sgp :ans 0.2) ;; noise
     (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
-    (sgp :rt 0.5) ;; retrieval threshold
+    ;;(sgp :rt 0.5) ;; retrieval threshold
 
     (chunk-type landmark piece-type location type)
     (chunk-type process-goal state)
     (chunk-type landmark-goal state piece-type location)
     (chunk-type action piece location)
-    (chunk-type puzzle-state pieces-available BIG-T1 BIG-T2 MEDIUM-T SMALL-T1 SMALL-T2 SQUARE PARALL)
+    (chunk-type puzzle-state pieces-available )
+    (chunk-type piece-state BIG-T MEDIUM-T SMALL-T SQUARE PARALL)
     (chunk-type piece name type)
+
 
     (add-dm
     (BIG-T1 ISA PIECE NAME BIG-T1 TYPE BIG-T)
@@ -47,11 +49,12 @@
         =goal>
             isa process-goal
             state choose-landmark
-        =retrieval>
+        ?retrieval>
             state free
         ==>
         +retrieval>
             isa landmark
+            - location nil
             :recently-retrieved nil
         =imaginal>
         =goal>
@@ -95,10 +98,12 @@
             state search
             piece-type =p
             - piece-type UNF-REGION
+            - piece-type COMPOUND
         =imaginal> ;; pieces of that type are left
+            isa piece-state
             =p t
 
-        =retrieval>
+        ?retrieval>
             state free
         ==>
         =goal>
@@ -109,11 +114,26 @@
         =imaginal>
     )
 
+    (P compound-to-expand "a compound ldm is found"
+      =goal>
+          isa landmark-goal
+          state search
+          piece-type COMPOUND
+          piece-type =p
+          location =l
+      ==>
+      !eval! ("update" =p =l)
+      +goal>
+          isa process-goal
+          state choose-landmark
+      )
+
     (P no-piece "the chosen piece is not available"
         =goal>
             isa landmark-goal
             state search
             piece-type =p
+            - piece-type COMPOUND
         =imaginal> ;; pieces of that type are left
             =p nil
         ==>
@@ -148,6 +168,7 @@
             type =p
         ==>
         !eval! ("update" =p =l)
+        ;;!bind! =new ("update" =p =l)
         +goal>
             isa process-goal
             state choose-landmark
