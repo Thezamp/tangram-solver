@@ -966,4 +966,5 @@ add_command("Python-import-from-file",env_loader,"Import a Python module and mak
     
 add_command("load-python-module-html",env_loader_no_path,"Import a python module from the directory containing the actr.py module and make it available directly from the interactive prompt. Params: filename")
 
-
+def set_base_levels(*features):
+    return current_connection.evaluate_single("set-base-levels", *features)
