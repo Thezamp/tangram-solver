@@ -1,5 +1,6 @@
 import actr
 
+saliency_dict = {'STRONG':3,'WEAK':1,'COMPOUND':2,'DERIVED':2}
 
 class Landmark:
     """ Represent a perceived landmark, defined as an
@@ -30,6 +31,7 @@ class Landmark:
         self.chunk_def = [name, "isa", "landmark", "piece-type", self.piece_type, "location", self.location, "type", self.type]
         if add_to_dm:
             actr.add_dm(self.chunk_def)
+        actr.set_base_levels()
 
     def add_triggers(self, tlist):
         self.triggers = tlist
@@ -50,3 +52,7 @@ class Landmark:
             return True
 
         return False
+
+    def get_saliency(self):
+
+        return saliency_dict.get(self.type)

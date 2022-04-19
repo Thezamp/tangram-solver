@@ -43,8 +43,8 @@ def generate_monk_ldm(unf_region_ldm):
 class Monk(Puzzle):
     def __init__(self, path= "ACT-R:tangram-solver;models;two-backtrack-model.lisp"):
         super().__init__(path)
-        self.active_landmarks, self.unseen_landmarks = generate_monk_ldm(self.unfeasible_ldm)
-        puzzle_state_to_imaginal(self.active_landmarks)
+        self.noticed_landmarks, self.unseen_landmarks = generate_monk_ldm(self.unfeasible_ldm)
+        puzzle_state_to_imaginal(self.noticed_landmarks)
 
 
 def main():

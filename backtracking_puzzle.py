@@ -15,7 +15,8 @@ class Puzzle():
 
     def __init__(self, path="ACT-R:tangram-solver;models;simple-model.lisp"):
         self.actr_setup(path)
-        self.active_landmarks = set()
+        self.noticed_landmarks = set()
+        self.placed_landmarks = []
         self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MEDIUM-T', 'PARALL', 'SQUARE']
         self.unfeasible_causes = []
         self.step_seq = []
@@ -36,12 +37,13 @@ class Puzzle():
         print(f'action taken: {piece} at {location}')
 
         #works only if landmarks are unique
-        used_ldm = [l for l in self.active_landmarks if l.is_involved(piece,location)][0]
-        #update the landmark_state
-        self.active_landmarks.remove(used_ldm)  # maybe not needed
-        self.active_landmarks.update(set(used_ldm.get_triggers()))
+        used_ldm = [l for l in self.noticed_landmarks if l.is_involved(piece,location)][0]
 
-        self.active_landmarks.difference_update(used_ldm.get_removes())
+        #update the landmark_state
+        self.noticed_landmarks.remove(used_ldm)  # maybe not needed
+        self.noticed_landmarks.update(set(used_ldm.get_triggers()))
+
+        self.noticed_landmarks.difference_update(used_ldm.get_removes())
 
         #track what causes the unfeasible regions
         if self.unfeasible_ldm in used_ldm.get_triggers():
@@ -49,7 +51,8 @@ class Puzzle():
 
         #track the step sequence
         self.step_seq.append(used_ldm)
-
+        #keep track of the landmarks
+        self.placed_landmarks.append(used_ldm)
         #decrase the list of available pieces
         if used_ldm.piece_type != 'COMPOUND':
             self.available_pieces.remove(used_ldm.piece_type)
@@ -61,32 +64,39 @@ class Puzzle():
             actr.set_buffer_chunk('imaginal', imaginal_chunk)
         else:
 
-            puzzle_state_to_imaginal(list(self.active_landmarks))
+            puzzle_state_to_imaginal(list(self.noticed_landmarks))
 
         return True
 
     def piece_backtrack(self):
-        pass
+        weakest=sorted(self.placed_landmarks, key= lambda k: k.get_saliency())[0]
+        self.noticed_landmarks.add(weakest)
+        self.noticed_landmarks.update(weakest.get_removes())
+        self.placed_landmarks.remove(weakest)
+        puzzle_state_to_imaginal(self.noticed_landmarks)
+        self.available_pieces.append(weakest.piece_type)
+        return True
 
     def region_backtrack(self):
 
         #ldm = self.unfeasible_causes.pop(-1)
         ldm = self.unfeasible_causes.pop(random.randrange(len(self.unfeasible_causes)))
-        self.active_landmarks.add(ldm)
-        self.active_landmarks.update(ldm.get_removes())
+        self.placed_landmarks.remove(ldm)
+        self.noticed_landmarks.add(ldm)
+        self.noticed_landmarks.update(ldm.get_removes())
         if len(self.unfeasible_causes) == 0:
-            self.active_landmarks.remove(self.unfeasible_ldm)
+            self.noticed_landmarks.remove(self.unfeasible_ldm)
 
-        puzzle_state_to_imaginal(self.active_landmarks)
+        puzzle_state_to_imaginal(self.noticed_landmarks)
         # ADD THE PIECE BACK
         self.available_pieces.append(ldm.piece_type)
+        print('Unfeasible region: backtrack')
         return True
 
     def get_pieces(self):
         state_def= ['isa', 'piece-state']
-        print('get pieces triggereds')
+
         for p in set(self.available_pieces):
-            print(p)
             state_def.append(p)
             state_def.append('t')
         imaginal_chunk = actr.define_chunks(state_def)

@@ -173,7 +173,6 @@ class actr():
             else:
                 return True
 
-
 def start (host=None,port=None):
 
     global current_connection

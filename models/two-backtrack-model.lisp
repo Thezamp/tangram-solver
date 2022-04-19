@@ -2,14 +2,14 @@
 (define-model two-backtrack
     (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
     (sgp :model-warnings nil)
-    (sgp :v t) ;; trace
+    (sgp :v nil) ;; trace
     (sgp :ans 0.2) ;; noise
     (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
     ;;(sgp :rt 0.5) ;; retrieval threshold
 
     (chunk-type landmark piece-type location type)
-    (chunk-type process-goal state)
-    (chunk-type landmark-goal state piece-type location)
+    (chunk-type process-goal state piece-type location)
+    ;;(chunk-type landmark-goal state piece-type location)
     (chunk-type action piece location)
     (chunk-type puzzle-state pieces-available )
     (chunk-type piece-state BIG-T MEDIUM-T SMALL-T SQUARE PARALL)
@@ -73,7 +73,7 @@
         ==>
         !bind! =res ("get-pieces") ;;update the imaginal buffer
         +goal>
-            isa landmark-goal
+            isa process-goal
             state search
             piece-type =p
             location =l
@@ -81,10 +81,11 @@
 
     (P unfeasible-region-found
         =goal>
-            isa landmark-goal
+            isa process-goal
             state search
             piece-type UNF-REGION
         ==>
+        !output! UNFEASIBLE-REGION-FOUND
         !bind! =res ("region-backtrack")
         +goal>
             isa process-goal
@@ -94,7 +95,7 @@
 
     (P try-retrieve-piece
         =goal>
-            isa landmark-goal
+            isa process-goal
             state search
             piece-type =p
             - piece-type UNF-REGION
@@ -116,7 +117,7 @@
 
     (P compound-to-expand "a compound ldm is found"
       =goal>
-          isa landmark-goal
+          isa process-goal
           state search
           piece-type COMPOUND
           piece-type =p
@@ -130,10 +131,11 @@
 
     (P no-piece "the chosen piece is not available"
         =goal>
-            isa landmark-goal
+            isa process-goal
             state search
             piece-type =p
             - piece-type COMPOUND
+            - piece-type UNF-REGION
         =imaginal> ;; pieces of that type are left
             =p nil
         ==>
@@ -159,7 +161,7 @@
 
     (P act-and-update "piece found, proceed"
         =goal>
-            isa landmark-goal
+            isa process-goal
             piece-type =p
             location =l
             state act
