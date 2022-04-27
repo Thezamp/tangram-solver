@@ -31,7 +31,7 @@ class Landmark:
         self.chunk_def = [name, "isa", "landmark", "piece-type", self.piece_type, "location", self.location, "type", self.type]
         if add_to_dm:
             actr.add_dm(self.chunk_def)
-        actr.set_base_levels()
+        actr.set_base_levels([name, saliency_dict.get(self.type)])
 
     def add_triggers(self, tlist):
         self.triggers = tlist
