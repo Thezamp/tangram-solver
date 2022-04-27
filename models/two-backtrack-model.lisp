@@ -54,7 +54,7 @@
         ==>
         +retrieval>
             isa landmark
-            - location nil
+            ;; - location nil
             :recently-retrieved nil
         =imaginal>
         =goal>
