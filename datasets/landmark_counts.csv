@@ -1,0 +1,363 @@
+,tangram nr,item,grid_val,rot,counts
+0,1,big triangle,-1.0,0.0,10
+1,1,big triangle,-1.0,45.0,1
+2,1,big triangle,-1.0,180.0,5
+3,1,big triangle,-1.0,225.0,1
+4,1,big triangle,-1.0,270.0,2
+5,1,big triangle,-1.0,315.0,4
+6,1,big triangle,1.0,0.0,4
+7,1,big triangle,1.0,45.0,1
+8,1,big triangle,2.0,0.0,5
+9,1,big triangle,2.0,270.0,1
+10,1,big triangle,5.0,0.0,1
+11,1,big triangle,5.0,45.0,9
+12,1,big triangle,5.0,135.0,6
+13,1,big triangle,5.0,225.0,9
+14,1,big triangle,5.0,270.0,1
+15,1,big triangle,5.0,315.0,15
+16,1,big triangle,6.0,180.0,2
+17,1,big triangle,6.0,225.0,2
+18,1,big triangle,6.0,270.0,1
+19,1,big triangle,9.0,0.0,33
+20,1,big triangle,9.0,180.0,1
+21,1,big triangle,9.0,315.0,1
+22,1,big triangle,10.0,225.0,1
+23,1,big triangle,11.0,180.0,1
+24,1,big triangle,13.0,180.0,2
+25,1,big triangle,13.0,225.0,1
+26,1,big triangle,14.0,180.0,1
+27,1,big triangle,15.0,0.0,1
+28,1,big triangle,15.0,270.0,2
+29,1,middle triangle,-1.0,0.0,2
+30,1,middle triangle,-1.0,45.0,1
+31,1,middle triangle,-1.0,90.0,2
+32,1,middle triangle,-1.0,135.0,3
+33,1,middle triangle,-1.0,180.0,6
+34,1,middle triangle,-1.0,225.0,6
+35,1,middle triangle,-1.0,315.0,1
+36,1,middle triangle,1.0,0.0,3
+37,1,middle triangle,1.0,135.0,1
+38,1,middle triangle,2.0,180.0,1
+39,1,middle triangle,4.0,90.0,1
+40,1,middle triangle,4.0,180.0,8
+41,1,middle triangle,5.0,135.0,4
+42,1,middle triangle,5.0,180.0,1
+43,1,middle triangle,5.0,315.0,1
+44,1,middle triangle,6.0,180.0,4
+45,1,middle triangle,6.0,225.0,1
+46,1,middle triangle,7.0,45.0,1
+47,1,middle triangle,7.0,180.0,14
+48,1,middle triangle,9.0,0.0,1
+49,1,middle triangle,11.0,45.0,2
+50,1,middle triangle,13.0,135.0,2
+51,1,middle triangle,14.0,225.0,1
+52,1,middle triangle,15.0,180.0,2
+53,1,parallelogram,-1.0,0.0,1
+54,1,parallelogram,-1.0,45.0,4
+55,1,parallelogram,-1.0,90.0,26
+56,1,parallelogram,-1.0,135.0,5
+57,1,parallelogram,0.0,135.0,2
+58,1,parallelogram,1.0,45.0,4
+59,1,parallelogram,1.0,90.0,1
+60,1,parallelogram,1.0,135.0,1
+61,1,parallelogram,2.0,0.0,1
+62,1,parallelogram,2.0,90.0,5
+63,1,parallelogram,2.0,135.0,3
+64,1,parallelogram,3.0,0.0,1
+65,1,parallelogram,3.0,45.0,15
+66,1,parallelogram,5.0,135.0,6
+67,1,parallelogram,6.0,0.0,1
+68,1,parallelogram,6.0,45.0,2
+69,1,parallelogram,6.0,90.0,1
+70,1,parallelogram,6.0,135.0,1
+71,1,parallelogram,9.0,90.0,3
+72,1,parallelogram,11.0,135.0,1
+73,1,parallelogram,14.0,90.0,1
+74,1,parallelogram,15.0,45.0,1
+75,1,parallelogram,15.0,90.0,2
+76,1,parallelogram,15.0,135.0,1
+77,1,parallelogram,16.0,90.0,1
+78,1,small triangle,-1.0,0.0,4
+79,1,small triangle,-1.0,45.0,4
+80,1,small triangle,-1.0,90.0,2
+81,1,small triangle,-1.0,135.0,2
+82,1,small triangle,-1.0,180.0,2
+83,1,small triangle,-1.0,315.0,2
+84,1,small triangle,0.0,45.0,20
+85,1,small triangle,1.0,45.0,1
+86,1,small triangle,1.0,225.0,1
+87,1,small triangle,2.0,135.0,2
+88,1,small triangle,2.0,225.0,3
+89,1,small triangle,2.0,315.0,2
+90,1,small triangle,3.0,45.0,1
+91,1,small triangle,3.0,135.0,1
+92,1,small triangle,3.0,315.0,9
+93,1,small triangle,5.0,45.0,5
+94,1,small triangle,5.0,90.0,1
+95,1,small triangle,5.0,135.0,3
+96,1,small triangle,5.0,315.0,3
+97,1,small triangle,6.0,45.0,6
+98,1,small triangle,6.0,135.0,3
+99,1,small triangle,6.0,315.0,5
+100,1,small triangle,7.0,45.0,1
+101,1,small triangle,7.0,315.0,1
+102,1,small triangle,8.0,225.0,1
+103,1,small triangle,9.0,0.0,1
+104,1,small triangle,9.0,45.0,1
+105,1,small triangle,10.0,0.0,1
+106,1,small triangle,11.0,45.0,2
+107,1,small triangle,11.0,135.0,2
+108,1,small triangle,13.0,0.0,1
+109,1,square,-1.0,0.0,9
+110,1,square,-1.0,45.0,1
+111,1,square,1.0,0.0,1
+112,1,square,2.0,0.0,15
+113,1,square,5.0,0.0,12
+114,1,square,6.0,0.0,9
+115,1,square,6.0,45.0,1
+116,1,square,7.0,0.0,1
+117,1,square,9.0,45.0,1
+118,1,square,11.0,0.0,2
+119,1,square,11.0,45.0,2
+120,1,square,13.0,45.0,1
+121,1,square,15.0,0.0,1
+122,1,square,15.0,45.0,2
+123,2,big triangle,-1.0,0.0,4
+124,2,big triangle,-1.0,45.0,2
+125,2,big triangle,-1.0,90.0,1
+126,2,big triangle,-1.0,180.0,2
+127,2,big triangle,-1.0,225.0,1
+128,2,big triangle,-1.0,270.0,2
+129,2,big triangle,0.0,0.0,1
+130,2,big triangle,2.0,0.0,21
+131,2,big triangle,5.0,0.0,2
+132,2,big triangle,5.0,135.0,1
+133,2,big triangle,5.0,225.0,1
+134,2,big triangle,6.0,0.0,34
+135,2,big triangle,6.0,135.0,2
+136,2,big triangle,6.0,180.0,20
+137,2,big triangle,6.0,315.0,1
+138,2,big triangle,9.0,90.0,1
+139,2,big triangle,9.0,135.0,1
+140,2,middle triangle,-1.0,0.0,4
+141,2,middle triangle,-1.0,225.0,6
+142,2,middle triangle,-1.0,315.0,2
+143,2,middle triangle,1.0,225.0,8
+144,2,middle triangle,1.0,315.0,4
+145,2,middle triangle,2.0,45.0,4
+146,2,middle triangle,2.0,135.0,2
+147,2,middle triangle,3.0,135.0,1
+148,2,middle triangle,5.0,0.0,3
+149,2,middle triangle,5.0,225.0,8
+150,2,middle triangle,5.0,315.0,4
+151,2,middle triangle,6.0,45.0,2
+152,2,middle triangle,6.0,135.0,2
+153,2,middle triangle,10.0,135.0,1
+154,2,parallelogram,-1.0,45.0,3
+155,2,parallelogram,-1.0,90.0,5
+156,2,parallelogram,4.0,45.0,1
+157,2,parallelogram,9.0,45.0,30
+158,2,parallelogram,9.0,90.0,2
+159,2,parallelogram,11.0,90.0,1
+160,2,parallelogram,12.0,45.0,1
+161,2,small triangle,-1.0,0.0,6
+162,2,small triangle,-1.0,45.0,2
+163,2,small triangle,-1.0,90.0,3
+164,2,small triangle,-1.0,135.0,6
+165,2,small triangle,-1.0,225.0,7
+166,2,small triangle,0.0,90.0,8
+167,2,small triangle,0.0,315.0,1
+168,2,small triangle,1.0,0.0,4
+169,2,small triangle,2.0,0.0,8
+170,2,small triangle,2.0,225.0,1
+171,2,small triangle,3.0,0.0,2
+172,2,small triangle,3.0,135.0,1
+173,2,small triangle,3.0,180.0,1
+174,2,small triangle,3.0,270.0,15
+175,2,small triangle,4.0,0.0,1
+176,2,small triangle,4.0,90.0,3
+177,2,small triangle,5.0,180.0,4
+178,2,small triangle,6.0,180.0,8
+179,2,small triangle,7.0,135.0,2
+180,2,small triangle,7.0,225.0,1
+181,2,small triangle,7.0,270.0,2
+182,2,small triangle,8.0,135.0,3
+183,2,small triangle,9.0,45.0,1
+184,2,small triangle,9.0,315.0,1
+185,2,small triangle,10.0,0.0,1
+186,2,small triangle,13.0,45.0,2
+187,2,small triangle,13.0,135.0,2
+188,2,small triangle,13.0,225.0,1
+189,2,small triangle,13.0,315.0,2
+190,2,small triangle,14.0,315.0,1
+191,2,small triangle,15.0,45.0,1
+192,2,square,-1.0,0.0,4
+193,2,square,-1.0,45.0,4
+194,2,square,3.0,0.0,1
+195,2,square,13.0,0.0,31
+196,2,square,13.0,45.0,1
+197,2,square,15.0,0.0,1
+198,3,big triangle,-1.0,90.0,1
+199,3,big triangle,-1.0,135.0,5
+200,3,big triangle,-1.0,180.0,2
+201,3,big triangle,-1.0,225.0,6
+202,3,big triangle,-1.0,270.0,3
+203,3,big triangle,1.0,0.0,1
+204,3,big triangle,1.0,45.0,1
+205,3,big triangle,6.0,0.0,13
+206,3,big triangle,6.0,180.0,2
+207,3,big triangle,8.0,135.0,33
+208,3,big triangle,9.0,90.0,10
+209,3,big triangle,10.0,225.0,9
+210,3,big triangle,11.0,225.0,16
+211,3,big triangle,12.0,180.0,1
+212,3,big triangle,12.0,225.0,1
+213,3,big triangle,14.0,225.0,14
+214,3,big triangle,15.0,225.0,2
+215,3,big triangle,15.0,270.0,1
+216,3,middle triangle,-1.0,45.0,1
+217,3,middle triangle,-1.0,90.0,3
+218,3,middle triangle,-1.0,135.0,1
+219,3,middle triangle,-1.0,180.0,3
+220,3,middle triangle,-1.0,225.0,11
+221,3,middle triangle,0.0,225.0,1
+222,3,middle triangle,2.0,180.0,1
+223,3,middle triangle,3.0,180.0,1
+224,3,middle triangle,3.0,225.0,1
+225,3,middle triangle,4.0,0.0,1
+226,3,middle triangle,5.0,180.0,20
+227,3,middle triangle,6.0,180.0,5
+228,3,middle triangle,6.0,225.0,2
+229,3,middle triangle,7.0,180.0,1
+230,3,middle triangle,8.0,0.0,1
+231,3,middle triangle,9.0,90.0,1
+232,3,middle triangle,9.0,135.0,1
+233,3,middle triangle,11.0,0.0,1
+234,3,middle triangle,11.0,315.0,1
+235,3,middle triangle,13.0,90.0,2
+236,3,middle triangle,14.0,90.0,1
+237,3,middle triangle,14.0,225.0,1
+238,3,middle triangle,15.0,90.0,2
+239,3,middle triangle,15.0,225.0,1
+240,3,parallelogram,-1.0,0.0,2
+241,3,parallelogram,-1.0,45.0,4
+242,3,parallelogram,-1.0,90.0,10
+243,3,parallelogram,-1.0,135.0,6
+244,3,parallelogram,1.0,90.0,2
+245,3,parallelogram,1.0,135.0,4
+246,3,parallelogram,2.0,45.0,20
+247,3,parallelogram,2.0,90.0,1
+248,3,parallelogram,3.0,45.0,1
+249,3,parallelogram,4.0,45.0,2
+250,3,parallelogram,6.0,45.0,1
+251,3,parallelogram,6.0,90.0,5
+252,3,parallelogram,7.0,90.0,3
+253,3,parallelogram,9.0,0.0,5
+254,3,parallelogram,10.0,45.0,1
+255,3,parallelogram,10.0,135.0,1
+256,3,parallelogram,14.0,135.0,2
+257,3,parallelogram,15.0,0.0,2
+258,3,parallelogram,15.0,135.0,1
+259,3,small triangle,-1.0,0.0,4
+260,3,small triangle,-1.0,45.0,2
+261,3,small triangle,-1.0,90.0,3
+262,3,small triangle,-1.0,135.0,4
+263,3,small triangle,-1.0,225.0,2
+264,3,small triangle,-1.0,315.0,5
+265,3,small triangle,0.0,45.0,10
+266,3,small triangle,2.0,315.0,11
+267,3,small triangle,3.0,90.0,2
+268,3,small triangle,4.0,135.0,5
+269,3,small triangle,5.0,90.0,6
+270,3,small triangle,5.0,135.0,1
+271,3,small triangle,6.0,0.0,2
+272,3,small triangle,6.0,225.0,1
+273,3,small triangle,6.0,315.0,1
+274,3,small triangle,7.0,0.0,5
+275,3,small triangle,9.0,135.0,7
+276,3,small triangle,10.0,90.0,1
+277,3,small triangle,11.0,45.0,1
+278,3,small triangle,13.0,90.0,8
+279,3,small triangle,14.0,225.0,2
+280,3,small triangle,15.0,225.0,2
+281,3,square,-1.0,0.0,13
+282,3,square,-1.0,45.0,2
+283,3,square,1.0,0.0,16
+284,3,square,3.0,0.0,2
+285,3,square,5.0,0.0,6
+286,3,square,6.0,0.0,9
+287,3,square,6.0,45.0,3
+288,3,square,7.0,0.0,1
+289,3,square,9.0,45.0,1
+290,3,square,10.0,0.0,1
+291,3,square,10.0,45.0,9
+292,3,square,11.0,0.0,1
+293,3,square,15.0,0.0,1
+294,3,square,15.0,45.0,1
+295,4,big triangle,-1.0,0.0,2
+296,4,big triangle,-1.0,45.0,1
+297,4,big triangle,-1.0,90.0,7
+298,4,big triangle,-1.0,135.0,5
+299,4,big triangle,-1.0,180.0,4
+300,4,big triangle,-1.0,225.0,4
+301,4,big triangle,-1.0,270.0,28
+302,4,big triangle,-1.0,315.0,1
+303,4,big triangle,1.0,90.0,1
+304,4,big triangle,2.0,90.0,1
+305,4,big triangle,3.0,45.0,1
+306,4,big triangle,4.0,225.0,2
+307,4,big triangle,5.0,90.0,8
+308,4,big triangle,5.0,225.0,1
+309,4,big triangle,6.0,45.0,25
+310,4,big triangle,6.0,90.0,1
+311,4,big triangle,6.0,135.0,2
+312,4,big triangle,6.0,180.0,2
+313,4,big triangle,6.0,225.0,2
+314,4,big triangle,6.0,270.0,3
+315,4,big triangle,6.0,315.0,1
+316,4,big triangle,7.0,90.0,4
+317,4,big triangle,7.0,135.0,1
+318,4,big triangle,7.0,180.0,1
+319,4,big triangle,7.0,270.0,5
+320,4,big triangle,10.0,135.0,25
+321,4,big triangle,11.0,90.0,1
+322,4,big triangle,11.0,180.0,1
+323,4,big triangle,11.0,270.0,34
+324,4,middle triangle,-1.0,135.0,2
+325,4,middle triangle,-1.0,225.0,5
+326,4,middle triangle,-1.0,270.0,4
+327,4,middle triangle,2.0,225.0,1
+328,4,middle triangle,6.0,135.0,1
+329,4,middle triangle,6.0,180.0,1
+330,4,middle triangle,6.0,225.0,20
+331,4,middle triangle,6.0,270.0,1
+332,4,middle triangle,7.0,270.0,1
+333,4,middle triangle,11.0,270.0,1
+334,4,parallelogram,-1.0,0.0,1
+335,4,parallelogram,-1.0,90.0,9
+336,4,parallelogram,-1.0,135.0,1
+337,4,parallelogram,4.0,90.0,1
+338,4,parallelogram,5.0,135.0,1
+339,4,parallelogram,6.0,135.0,1
+340,4,parallelogram,7.0,135.0,1
+341,4,parallelogram,8.0,90.0,2
+342,4,parallelogram,9.0,45.0,1
+343,4,parallelogram,9.0,90.0,38
+344,4,parallelogram,10.0,45.0,1
+345,4,small triangle,-1.0,0.0,4
+346,4,small triangle,-1.0,90.0,3
+347,4,small triangle,1.0,135.0,13
+348,4,small triangle,2.0,90.0,1
+349,4,small triangle,2.0,135.0,13
+350,4,small triangle,5.0,180.0,1
+351,4,small triangle,5.0,270.0,1
+352,4,small triangle,8.0,0.0,1
+353,4,small triangle,15.0,0.0,32
+354,4,square,-1.0,0.0,1
+355,4,square,-1.0,45.0,5
+356,4,square,2.0,0.0,1
+357,4,square,4.0,45.0,1
+358,4,square,5.0,45.0,1
+359,4,square,14.0,0.0,1
+360,4,square,14.0,45.0,1
+361,4,square,15.0,0.0,32
