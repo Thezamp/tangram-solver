@@ -18,7 +18,7 @@ def get_grid_value(rm, cm, tgn):
 
     outputs the grid number 0-15, or -1 in case the placement is generically outside the grid
     '''
-    # attention: coordinates for triangles are currently from the middle point of the bbox
+
     y = -rm + 300
     x = cm - 400
 
@@ -69,9 +69,18 @@ def find_placements(piece, state_img, edged_image):
             yr = min_loc[0] + w // 2 + 1
 
             res[xt:xb, yl:yr] = float('inf')
-            central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)
+            central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2) #center of the bounding box
             if (state_img[central_coord] == 1):
                 # print((min_loc[1]+h//2,min_loc[0]+w//2))
+                if 'triangle' in piece.name: #coordinates in the app are calculated on the long side
+                    if ti == 0:
+                        central_coord = (min_loc[1] + h - 2, min_loc[0] + w // 2)
+                    elif ti == 2:
+                        central_coord = (min_loc[1] + h // 2, min_loc[0] + 2)
+                    elif ti == 4:
+                        central_coord = (min_loc[1] + 2, min_loc[0] + w // 2)
+                    elif ti == 6:
+                        central_coord = (min_loc[1] + h // 2, min_loc[0] + w - 2)
 
                 available_placements.append((central_coord, ti * 45))
                 i += 1
@@ -96,8 +105,8 @@ class LandmarkExtractor:
                        'big_t': Template('big triangle', './tans/bigt.png', 7),
                        'middle_t': Template('middle triangle', './tans/middlet.png', 7),
                        'square': Template('square', './tans/square.png', 2),
-                       'parallelogram': Template('parall', './tans/parall1.png', 3),
-                       'parallelogram_m': Template('parall', './tans/parall2.png', 7)
+                       'parallelogram': Template('parallelogram', './tans/parall1.png', 3),
+                       'parallelogram_m': Template('parallelogram', './tans/parall2.png', 7)
                        }
         self.tgn = tgn
         counts = pd.read_csv('./../datasets/landmark_counts.csv')
@@ -135,9 +144,9 @@ class LandmarkExtractor:
 def main():
     l = LandmarkExtractor(4)
     start = time.time()
-    l.extract('./example_pictures/1.png')
+    imaginal = l.extract('./example_pictures/1.png')
     print(time.time() - start)
-
+    print(imaginal)
     # time.sleep(10)
     return 0
 
