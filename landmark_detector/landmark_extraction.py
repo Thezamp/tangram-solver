@@ -109,12 +109,14 @@ class LandmarkExtractor:
                        'parallelogram_m': Template('parallelogram', './tans/parall2.png', 7)
                        }
         self.tgn = tgn
-        counts = pd.read_csv('./../datasets/landmark_counts.csv')
-        self.counts = counts.loc[counts['tangram nr'] == tgn]
+        self.counts=[]
+        for phase in [4,8,12,16]:
+            counts = pd.read_csv(f'./../datasets/landmark_counts_{phase}.csv')
+            self.counts.append(counts.loc[counts['tangram nr'] == tgn])
         steps = pd.read_csv('./../datasets/steps.csv')
         self.steps = steps.loc[steps['tangram nr'] == tgn]
 
-    def extract(self, image_path):
+    def extract(self, image_path, step):
         # binary image
         state = cv.imread(image_path, 0)
         state = state[31:-1, 1:-1]
@@ -132,9 +134,10 @@ class LandmarkExtractor:
                 rot = p[1]
                 grid = get_grid_value(p[0][0], p[0][1], self.tgn)
                 if grid != -1:
-                    row = self.counts.loc[(self.counts['grid_val'] == grid) & \
-                                          (self.counts['rot'] == rot) & \
-                                          (self.counts.item == piece.name)]
+                    counts = self.counts[step//4]
+                    row = counts.loc[(counts['grid_val'] == grid) & \
+                                          (counts['rot'] == rot) & \
+                                          (counts.item == piece.name)]
                     if not row.empty:
                         ldm_count = row['counts'].values
                         extracted_landmarks.append((piece.name, grid, rot, ldm_count[0]))
@@ -144,9 +147,11 @@ class LandmarkExtractor:
 def main():
     l = LandmarkExtractor(4)
     start = time.time()
-    imaginal = l.extract('./example_pictures/1.png')
+    imaginal = l.extract('./example_pictures/1.png',0)
     print(time.time() - start)
     print(imaginal)
+    print(len(imaginal))
+
     # time.sleep(10)
     return 0
 
