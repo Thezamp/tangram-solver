@@ -52,7 +52,7 @@ class Puzzle():
         self.current_placements = []  # what landmarks are actually used
         self.step_sequence = []  # all the landmarks
         self.problem_placements = []  # the landmarks that generated unfeasible regions
-        self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MEDIUM-T', 'PARALL', 'SQUARE']
+        self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MIDDLE-T', 'PARALL', 'SQUARE']
         self.current_imaginal = []  # python equivalent of the imaginal buffer, maybe use dict?
         # self.unfeasible_ldm = Landmark(['UNF-REGION', 'UNF-REGION', 'BACKTRACK', 'STRONG']) #TO be defined
         self.extractor = LandmarkExtractor(tgn)
