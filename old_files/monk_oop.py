@@ -1,5 +1,5 @@
 import actr
-from landmark import Landmark
+from old_files.landmark import Landmark
 
 
 # path= "ACT-R:tangram-solver;simple-model.lisp"

@@ -1,5 +1,5 @@
 import actr
-from landmark import Landmark
+from old_files.landmark import Landmark
 import random
 
 def puzzle_state_to_imaginal(ldm_list):

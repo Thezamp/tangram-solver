@@ -1,4 +1,4 @@
-from landmark import Landmark
+from old_files.landmark import Landmark
 from old_files.puzzle import Puzzle, list_to_imaginal
 
 def generate_house_with_chimney_landmarks():

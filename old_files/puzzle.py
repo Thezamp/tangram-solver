@@ -1,5 +1,4 @@
 import actr
-from landmark import Landmark
 
 
 def list_to_imaginal(ldm_list):

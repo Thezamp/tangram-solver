@@ -1,4 +1,4 @@
-from landmark import Landmark
+from old_files.landmark import Landmark
 from backtracking_puzzle import Puzzle,puzzle_state_to_imaginal
 
 
