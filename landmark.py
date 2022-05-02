@@ -13,7 +13,7 @@ class Landmark:
         self.type = landmark_def[3] #to move into weak/medium/strong
         self.name = f'{self.piece}-{self.grid}-{self.orientation}'
 
-        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece, "grid", self.grid, "orientaton", self.orientation]
+        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece, "grid", self.grid, "orientation", self.orientation]
         if not actr.chunk_p(self.name):
             actr.add_dm(self.chunk_def)
         #actr.set_base_levels([self.name, saliency_dict.get(self.type)])

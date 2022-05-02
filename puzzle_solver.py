@@ -3,7 +3,7 @@ import os
 import actr
 from landmark import Landmark
 from landmark_detector.landmark_extraction import LandmarkExtractor
-
+from application.application_screen import ApplicationScreen
 
 
 def puzzle_state_to_imaginal(extracted):
@@ -47,16 +47,17 @@ def make_move(piece, grid, orientation):
 
 class Puzzle():
 
-    def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
+    def __init__(self, tgn, appscreen, path="ACT-R:tangram-solver;models;solver-model.lisp"):
         self.actr_setup(path)
         self.current_placements = []  # what landmarks are actually used
         self.step_sequence = []  # all the landmarks
         self.problem_placements = []  # the landmarks that generated unfeasible regions
         self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MIDDLE-T', 'PARALL', 'SQUARE']
         self.current_imaginal = []  # python equivalent of the imaginal buffer, maybe use dict?
-        # self.unfeasible_ldm = Landmark(['UNF-REGION', 'UNF-REGION', 'BACKTRACK', 'STRONG']) #TO be defined
+        # self.unfeasible_ldm = Landmark(['UNC:\Users\ASUS\Desktop\Hamburg\ACT-R\tangram-solver\models\solver-model.lispF-REGION', 'UNF-REGION', 'BACKTRACK', 'STRONG']) #TO be defined
         self.extractor = LandmarkExtractor(tgn)
         self.step = 0
+        self.appscreen = appscreen
 
     def actr_setup(self, path):
         actr.reset()
@@ -67,7 +68,7 @@ class Puzzle():
         actr.add_command("region-backtrack", self.region_backtrack)
         actr.add_command("get-pieces", self.get_pieces)
 
-        actr.add_dm(['start', 'isa', 'goal', 'state', 'chose-landmark'])
+        actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
     def update(self, piece, grid, orientation):
         print(f'action taken: {piece}-{orientation} at grid pos {grid}')
@@ -114,7 +115,9 @@ class Puzzle():
 
 
 def main():
-    p = Puzzle(4)
+    appscreen = ApplicationScreen()
+    p = Puzzle(4,appscreen)
+    p.appscreen.dump_gui()
     p.run(20)
 
 
