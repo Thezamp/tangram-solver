@@ -6,7 +6,7 @@ from landmark_detector.landmark_extraction import LandmarkExtractor
 from application.application_screen import ApplicationScreen
 
 
-def puzzle_state_to_imaginal(extracted):
+def puzzle_state_to_imaginal(extracted, problem):
     """
     sets the actr imaginal buffer
 
@@ -23,8 +23,8 @@ def puzzle_state_to_imaginal(extracted):
     )
 
     """
-    ldm_list=  extracted[0]
-    problem = extracted[1]
+    ldm_list=  extracted
+    #problem = extracted
     state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'T']
     current_imaginal = []
     for i in range(len(ldm_list[0:6])):
@@ -87,7 +87,7 @@ class Puzzle():
         if problem:
             self.problem_placements.append(used)
 
-        self.current_imaginal = puzzle_state_to_imaginal(new_landmarks, problem)
+        self.current_imaginal = puzzle_state_to_imaginal(new_landmarks,problem)
 
         return True
 

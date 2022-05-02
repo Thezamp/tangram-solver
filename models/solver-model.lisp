@@ -5,7 +5,7 @@
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
   (sgp :ans 0.2) ;; noise
-  (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
+  ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
   ;;(sgp :rt 0.5) ;; retrieval threshold
 
 
