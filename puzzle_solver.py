@@ -1,12 +1,15 @@
 import os
 
+import pandas as pd
+
 import actr
 from landmark import Landmark
 from landmark_detector.landmark_extraction import LandmarkExtractor
 from application.application_screen import ApplicationScreen
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def puzzle_state_to_imaginal(extracted, problem):
+def puzzle_state_to_imaginal(extracted):
     """
     sets the actr imaginal buffer
 
@@ -23,8 +26,8 @@ def puzzle_state_to_imaginal(extracted, problem):
     )
 
     """
-    ldm_list=  extracted
-    #problem = extracted
+    ldm_list=  extracted[0]
+    problem = extracted[1]
     state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'T']
     current_imaginal = []
     for i in range(len(ldm_list[0:6])):
@@ -41,23 +44,44 @@ def puzzle_state_to_imaginal(extracted, problem):
     return current_imaginal
 
 
-def make_move(piece, grid, orientation):
-    return ''
+
+class Piece():
+    def __init__(self,name,type):
+        self.name = name
+        self.type = type
+        self.used = False
+        self.grid = -1
+        self.orientation =0
+
+
+    def place(self,grid, orientation):
+        self.grid = grid
+        self.orientation = orientation
+        self.used = True
+
+    def remove(self):
+        self.grid = -1
+        self.used = False
+
 
 
 class Puzzle():
-
+###NEED TO FIX PIECES AND LANDMARKS
     def __init__(self, tgn, appscreen, path="ACT-R:tangram-solver;models;solver-model.lisp"):
         self.actr_setup(path)
         self.current_placements = []  # what landmarks are actually used
         self.step_sequence = []  # all the landmarks
         self.problem_placements = []  # the landmarks that generated unfeasible regions
         self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MIDDLE-T', 'PARALL', 'SQUARE']
+        # self.available_pieces = [Piece("SMALL-T-1",'SMALL-T'),Piece("SMALL-T-2",'SMALL-T'),Piece("MIDDLE-T",'MIDDLE-T'), \
+        #                          Piece("BIG-T-1",'BIG-T'),Piece("BIG-T-1",'BIG-T'), Piece("SQUARE",'SQUARE'), Piece("PARALL",'PARALL')]
+
         self.current_imaginal = []  # python equivalent of the imaginal buffer, maybe use dict?
-        # self.unfeasible_ldm = Landmark(['UNC:\Users\ASUS\Desktop\Hamburg\ACT-R\tangram-solver\models\solver-model.lispF-REGION', 'UNF-REGION', 'BACKTRACK', 'STRONG']) #TO be defined
         self.extractor = LandmarkExtractor(tgn)
         self.step = 0
         self.appscreen = appscreen
+        data = pd.read_csv(f'{ROOT_DIR}/../datasets/steps.csv')
+        self.players_data = data.loc[data['tangram nr'] == tgn]
 
     def actr_setup(self, path):
         actr.reset()
@@ -80,16 +104,24 @@ class Puzzle():
         self.available_pieces.remove(used.piece)
 
         # generate the new picture
-        path = make_move(used.piece, used.grid, used.orientation)
+        path = self.make_move(used.piece, used.grid, used.orientation)
         self.step += 1
-        new_landmarks, problem = self.extractor.extract(path, self.available_pieces, self.step)
+        extracted= self.extractor.extract(path, self.available_pieces, self.step)
 
-        if problem:
+        if extracted[1]:
             self.problem_placements.append(used)
 
-        self.current_imaginal = puzzle_state_to_imaginal(new_landmarks,problem)
+        self.current_imaginal = puzzle_state_to_imaginal(extracted)
 
         return True
+
+    def make_move(self, piece, grid, orientation):
+        x,y = self.players_data.loc[(self.players_data.item == piece) & \
+                                          (self.players_data.grid == grid) & \
+                                          (self.players_data.rot == orientation)][['x','y']].iloc[0]
+
+
+
 
     def piece_backtrack(self):
         return True

@@ -138,8 +138,7 @@ class LandmarkExtractor:
         for phase in [4, 8, 12, 16]:
             counts = pd.read_csv( f'{ROOT_DIR}/../datasets/landmark_counts_{phase}.csv')
             self.counts.append(counts.loc[counts['tangram nr'] == tgn])
-        steps = pd.read_csv(f'{ROOT_DIR}/../datasets/steps.csv')
-        self.steps = steps.loc[steps['tangram nr'] == tgn]
+
 
     def extract(self, image_path, pieces_list, step):
         problem = False

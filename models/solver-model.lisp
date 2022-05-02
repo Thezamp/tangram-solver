@@ -61,7 +61,7 @@
     state act-on-landmark
   =imaginal>
   =retrieval>
-    piece-type UNF-REGION
+    piece-type UNF-PIECE
   ==>
   !bind! =res ("region-backtrack")
   =imaginal>
