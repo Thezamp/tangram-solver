@@ -49,6 +49,7 @@
   ==>
   +retrieval>
     ISA  landmark
+    - piece-type nil
     ;; :recently-retrieved nil
   =imaginal>
   =goal>
@@ -120,7 +121,7 @@
   !bind! =res ("update" =p =g =o)
   =goal>
     ISA  goal
-    state choose-landmark
+    state wait
   )
 
 )

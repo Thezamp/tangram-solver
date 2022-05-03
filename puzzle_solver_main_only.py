@@ -130,7 +130,7 @@ class Puzzle():
         piece = next(x for x in self.available_pieces if x.type == piece)
         piece_idx = piece.index
         self.pos[piece_idx]= (x,y,orientation)
-        setpos(self.pos,self.sol)
+        #setpos(self.pos,self.sol)
         return piece
 
 
@@ -163,7 +163,11 @@ def main():
     p = Puzzle(4)
     setpos(p.pos,p.sol)
     #p.appscreen.dump_gui()
-    p.run(0.5)
+
+    for i in range(16):
+        p.run(0.5)
+        setpos(p.pos,p.sol)
+        #actr.goal_focus('start')
 
 
 if __name__ == '__main__':

@@ -45,6 +45,7 @@ def generate_rotation_templates(original, rotations):
 
     :return list: the list of rotated and cropped templates
     '''
+    original = original[3:,3:]
     nonzero = original.nonzero()
     templates = [original[min(nonzero[0]) - 2:max(nonzero[0]) + 2, min(nonzero[1]) - 2:max(nonzero[1]) + 2]]
     for r in range(-45, -45 * rotations, -45):
@@ -77,7 +78,7 @@ def find_placements(piece, state_img, edged_image):
 
         i = 0
         attempt = 0
-        while i < 4 and attempt < 5:
+        while i < 5 and attempt < 7:
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
 
             xt = min_loc[1] - h // 2 if min_loc[1] > 20 else 0
@@ -126,7 +127,7 @@ class LandmarkExtractor:
         #                'parallelogram': Template('PARALL', './tans/parall1.png', 3),
         #                'parallelogram_m': Template('PARALL', './tans/parall2.png', 7)
         #                }
-        self.pieces = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 7),
+        self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 7),
                        Template('BIG-T',  f'{ROOT_DIR}/tans/bigt.png', 7),
                        Template('MIDDLE-T',  f'{ROOT_DIR}/tans/middlet.png', 7),
                        Template('SQUARE',  f'{ROOT_DIR}/tans/square.png', 2),
@@ -141,10 +142,12 @@ class LandmarkExtractor:
 
 
     def extract(self, image_path, pieces_list, step):
+        counts = self.counts[step // 4]
+
         problem = False
         # binary image
         state = cv.imread(image_path, 0)
-        state = state[31:-1, 1:-1]
+        #state = state[31:-1, 1:-1]
         state[500:, :] = 0
         _, state = cv.threshold(state, 240, 1, cv.THRESH_BINARY)
 
@@ -152,8 +155,10 @@ class LandmarkExtractor:
         edged_image = cv.Canny(state * 255, 100, 200)
 
         extracted_landmarks = set()
-        for piece in [x for x in self.pieces if x.name in pieces_list]:
+        for piece in [x for x in self.pieces_templates if x.name in pieces_list]:
 
+            piece_counts = counts.loc[counts.item == piece.name]
+            piece_landmarks = set()
             available_placements = find_placements(piece, state, edged_image)
             # list of ((x,y),rot)
             for p in available_placements:
@@ -161,17 +166,20 @@ class LandmarkExtractor:
                 grid = get_grid_value(p[0][0], p[0][1], self.tgn)
                 if grid != -1:
 
-                    counts = self.counts[step // 4]
-                    row = counts.loc[(counts['grid_val'] == grid) & \
-                                     (counts['rot'] == rot) & \
-                                     (counts.item == piece.name)]
+
+                    row = piece_counts.loc[(piece_counts['grid_val'] == grid) & \
+                                     (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['counts'].values
-                        extracted_landmarks.add((piece.name, grid, rot, ldm_count[0]))
-        print(set([x[0] for x in extracted_landmarks]))
-        print(set(pieces_list))
-        if set([x[0] for x in extracted_landmarks]) != set(pieces_list):
-            problem = True
+                        #extracted_landmarks.add((piece.name, grid, rot, ldm_count[0]))
+                        piece_landmarks.add((piece.name, grid, rot, ldm_count[0]))
+            if len(piece_landmarks) == 0 and not piece_counts.empty and piece.name != 'PARALL':
+                problem = True
+
+            extracted_landmarks.update(piece_landmarks)
+
+        # if set([x[0] for x in extracted_landmarks]) != set(pieces_list):
+        #     problem = True
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
 
 

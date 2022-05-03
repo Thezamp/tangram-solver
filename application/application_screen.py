@@ -2,12 +2,9 @@ import sys
 import time, random
 import tkinter
 from turtle import Turtle, Screen, Vec2D
-from PIL import ImageGrab
+import io
+from PIL import ImageGrab, ImageDraw, Image
 
-start_position = [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 49, 90), (250, -49, 0), (200, 0, 45),
-                  (274, -74, 90), 1]
-solution = [(-131, -43, 45), (-131, 99, 135), (-112, -63, 225), (-140, -152, 135), (-65, 244, 0), (-65, 207, 0),
-            (-192, 90, 90), -1]
 
 A = 198.0
 a = A / 4.0
@@ -45,8 +42,11 @@ class TRhomboid(TStein):
         #screen.update()
 
 
+
+
+
 class ApplicationScreen:
-    def __init__(self):
+    def __init__(self,position,new=False):
         self.x_coordinate = 800
         self.y_coordinate = 600
         self.screen = Screen()
@@ -57,14 +57,45 @@ class ApplicationScreen:
         self.designer.pu()
         self.canvas = self.screen.getcanvas()
         self.create_tiles()
-        self.setgame(start_position,solution)
+        self.position = position
+        self.solution = [(-131, -43, 45), (-131, 99, 135), (-112, -63, 225), (-140, -152, 135), (-65, 244, 0), (-65, 207, 0),
+                    (-192, 90, 90), -1]
+        if new:
+            self.generate_templates()
+        self.setgame(self.position,self.solution)
 
-    def dump_gui(self):
+
+
+    def generate_templates(self):
+        i =0
+        for tile in self.TTiles:
+            tile.place(-270,150,0)
+            c1, c2, c3 = random.random() / 2, random.random() / 2, random.random() / 2
+            tile.pencolor('white')
+            tile.fillcolor('white')
+            self.screen.update()
+            self.dump_gui(250,250,f"./landmark_detector/example_pictures/tile{i}.png")
+            tile.place(0,0,0)
+            self.screen.update()
+            i+=1
+        self.TTiles[-1].place(-270,150,0)
+        self.TTiles[-1].flip()
+        self.screen.update()
+        self.dump_gui(250, 250, f"./landmark_detector/example_pictures/tile{i}.png")
+        self.TTiles[-1].place(0, 0, 0)
+        self.screen.update()
+
+    def dump_gui(self,w=800,h=600, name="puzzle_state.png"):
         x0 = self.canvas.winfo_rootx()
         y0 = self.canvas.winfo_rooty()
-        x1 = x0 + 800  # careful with the extractor
-        y1 = y0 + 600
-        ImageGrab.grab().crop((x0, y0, x1, y1)).save("puzzle_state.png")
+        x1 = x0 + w  # careful with the extractor
+        y1 = y0 + h
+        ImageGrab.grab().crop((x0, y0, x1, y1)).save(name)
+
+    def update_screen(self,idx,x,y,r):
+        self.position[idx] = (x,y,r)
+        self.setgame(self.position,self.solution)
+        self.dump_gui()
 
     def makerhomboidshapes(self):
         self.designer.shape("square")
@@ -132,3 +163,5 @@ class ApplicationScreen:
 
         for t in self.TTiles + self.STiles: t.showturtle()
         self.screen.update()
+        self.dump_gui()
+
