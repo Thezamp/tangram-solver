@@ -80,7 +80,7 @@ class Puzzle():
         self.extractor = LandmarkExtractor(tgn)
         self.step = 0
         self.appscreen = appscreen
-        data = pd.read_csv(f'{ROOT_DIR}/../datasets/steps.csv')
+        data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
 
     def actr_setup(self, path):
@@ -140,7 +140,7 @@ class Puzzle():
         return True
 
     def run(self, time=20):
-        path = './landmark_detector/example_pictures/1.png'
+        path = f'{ROOT_DIR}/landmark_detector/example_pictures/1.png'
         self.current_imaginal = puzzle_state_to_imaginal(self.extractor.extract(path, self.available_pieces, self.step))
         actr.goal_focus('start')
         actr.run(time)

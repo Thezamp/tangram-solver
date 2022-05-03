@@ -179,7 +179,7 @@ def main():
     l = LandmarkExtractor(4)
     start = time.time()
     pieces_list = ['SMALL-T', 'BIG-T', 'MIDDLE-T', 'SQUARE', 'PARALL']
-    imaginal, problem = l.extract('./example_pictures/1.png', pieces_list, 0)
+    imaginal, problem = l.extract(f'{ROOT_DIR}/puzzle_state.png', pieces_list, 0)
     print(time.time() - start)
     print(imaginal)
     print(problem)
