@@ -7,20 +7,20 @@ class Landmark:
 
     """
     def __init__(self, landmark_def):
-        self.piece = landmark_def[0]
+        self.piece_type = landmark_def[0]
         self.grid = landmark_def[1]
         self.orientation = landmark_def[2]
         self.type = landmark_def[3] #to move into weak/medium/strong
-        self.name = f'{self.piece}-{self.grid}-{self.orientation}'
+        self.name = f'{self.piece_type}-{self.grid}-{self.orientation}'
 
-        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece, "grid", self.grid, "orientation", self.orientation]
+        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type, "grid", self.grid, "orientation", self.orientation]
         if not actr.chunk_p(self.name):
             actr.add_dm(self.chunk_def)
         #actr.set_base_levels([self.name, saliency_dict.get(self.type)])
 
     def is_involved(self, piece, grid, orientation):
 
-        if self.piece == piece and self.grid==grid and self.orientation == orientation:
+        if self.piece_type == piece and self.grid==grid and self.orientation == orientation:
 
             return True
 

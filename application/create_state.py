@@ -24,7 +24,7 @@ class TStein(Turtle):
         self.setheading(h)
 
 class TRhomboid(TStein):
-    def __init__(self, name, clickable=True):
+    def __init__(self, name, clickable=False):
         TStein.__init__(self, 1, name, shape="rhomboid1", clickable=clickable)
         self.flipped = False
         self.pu()
@@ -51,13 +51,10 @@ def makerhomboidshapes(screen,designer):
 
 
 
-def setTiles(screen, data, STiles, TTiles):
+def setTiles(data, TTiles):
     c1, c2, c3 = random.random() / 2, random.random() / 2, random.random() / 2
     arrangeTiles(data, TTiles)
-    if TTiles[6].flipped:
-        TTiles[6].flip()
-    if STiles[6].flipped:
-        STiles[6].flip()
+
     for i in range(7):
         TTiles[i].pencolor(c1, c2, c3)
         TTiles[i].fillcolor(c1 + random.random() / 2, c2 + random.random() / 2, c3 + random.random() / 2)
@@ -65,7 +62,6 @@ def setTiles(screen, data, STiles, TTiles):
 
 def arrangeTiles(data, tileset):
     flip = data[-1] == -1
-    l = data[:7]
     for i in range(7):
         x, y, h = data[i]
         if i == 6 and flip:
@@ -79,7 +75,7 @@ def dump_gui(canvas,w=800,h=600, name="puzzle_state.png"):
     y1 = y0 + h
     ImageGrab.grab().crop((x0, y0, x1, y1)).save(name)
 
-def setpos(position, solution):
+def setpos(position, solution, first = False):
     xcoord= 800
     ycoord= 600
     screen = Screen()
@@ -89,7 +85,8 @@ def setpos(position, solution):
     designer= Turtle(visible=False)
     designer.pu()
     canvas = screen.getcanvas()
-    makerhomboidshapes(screen,designer)
+    if first:
+        makerhomboidshapes(screen,designer)
     screen.bgcolor("gray10")
     STiles= [TStein(A / 20., "big triangle 1", clickable=False),
                   TStein(A / 20., "big triangle 2", clickable=False),
@@ -110,12 +107,12 @@ def setpos(position, solution):
         s.turtlesize(s.size, s.size, 2)
         s.ht()
 
-    #screen.update()
-    setTiles(screen, position, STiles, TTiles)
+    screen.update()
     arrangeTiles(solution, STiles)
+    setTiles(position,TTiles)
 
     for t in TTiles + STiles: t.showturtle()
     screen.update()
-    sleep(0.2)
+    sleep(0.3)
     dump_gui(canvas)
     #screen.bye()

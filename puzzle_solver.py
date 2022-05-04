@@ -9,6 +9,17 @@ from application.application_screen import ApplicationScreen
 from application.create_state import setpos
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
+puzzle_def = {1:{},
+              2:{},
+              3:{},
+              4:{'pos':[(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 49, 90), (250, -49, 0), (200, 0, 45),
+                          (274, -74, 90), -1],
+                 'sol':[(-131, -43, 45), (-131, 99, 135), (-112, -63, 225), (-140, -152, 135), (-65, 244, 0),
+                         (-65, 207, 0),
+                         (-192, 90, 90), -1]}
+              }
+
 def puzzle_state_to_imaginal(extracted):
     """
     sets the actr imaginal buffer
@@ -30,9 +41,11 @@ def puzzle_state_to_imaginal(extracted):
     problem = extracted[1]
     state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'T']
     current_imaginal = []
+    flip =1
     for i in range(len(ldm_list[0:6])):
         l = Landmark(ldm_list[i])
         state_def.append(f'LANDMARK-{i + 1}')
+
         state_def.append(l.name)
         current_imaginal.append(l)
     if problem:
@@ -70,20 +83,18 @@ class Puzzle():
 ###NEED TO FIX PIECES AND LANDMARKS
     def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
         self.actr_setup(path)
-        self.current_placements = []  # what landmarks are actually used
-        self.step_sequence = []  # all the landmarks
-        self.problem_placements = []  # the landmarks that generated unfeasible regions
-        #self.available_pieces = ["SMALL-T", 'SMALL-T', 'BIG-T', 'BIG-T', 'MIDDLE-T', 'PARALL', 'SQUARE']
+
+        self.extractor = LandmarkExtractor(tgn)
+        self.pos = puzzle_def.get(tgn).get('pos')
+        self.sol = puzzle_def.get(tgn).get('sol')
         self.available_pieces = [Piece("SMALL-T-1",'SMALL-T',3),Piece("SMALL-T-2",'SMALL-T',4),Piece("MIDDLE-T",'MIDDLE-T',2),
                                  Piece("BIG-T-1",'BIG-T',0),Piece("BIG-T-2",'BIG-T',1), Piece("SQUARE",'SQUARE',5), Piece("PARALL",'PARALL',6)]
+        self.path = ''
+        self.current_placements = []  # what landmarks are actually used
+        self.step_sequence = []  # sequence of all the steps
+        self.problem_placements = []  # the landmarks that generated or are placed while there is an unfeasible region
+        self.current_imaginal = []  # python equivalent of the imaginal buffer
 
-        self.current_imaginal = []  # python equivalent of the imaginal buffer, maybe use dict?
-        self.pos = [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 49, 90), (250, -49, 0), (200, 0, 45),
-                          (274, -74, 90), 1]
-        self.sol = [(-131, -43, 45), (-131, 99, 135), (-112, -63, 225), (-140, -152, 135), (-65, 244, 0),
-                         (-65, 207, 0),
-                         (-192, 90, 90), -1]
-        self.extractor = LandmarkExtractor(tgn)
         self.step = 0
 
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
@@ -96,42 +107,48 @@ class Puzzle():
         actr.add_command("update", self.update)
         actr.add_command("piece-backtrack", self.piece_backtrack)
         actr.add_command("region-backtrack", self.region_backtrack)
-        actr.add_command("get-pieces", self.get_pieces)
 
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
-    def update(self, piece, grid, orientation):
-        print(f'action taken: {piece}-{orientation} at grid pos {grid}')
+    def update(self, piece_type, grid, orientation):
+
+
 
         # update the state
-        used = [x for x in self.current_imaginal if x.is_involved(piece, grid, orientation)][0]
+        chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, orientation)][0] #landmark that has been selected
 
+        if piece_type == 'PARALL':
+            self.pos[7] = 1
+        if piece_type == 'PARALL-INV':
+            self.pos[7] = -1
+            piece_type = 'PARALL'
         # generate the new picture
-        piece = self.make_move(used.piece, used.grid, used.orientation)
-        self.available_pieces.remove(piece)
+        x, y = self.players_data.loc[(self.players_data.item == piece_type) & \
+                                     (self.players_data['grid_val'] == grid) & \
+                                     (self.players_data.rot == orientation)][['x', 'y']].iloc[0]
 
-        self.step_sequence.append((used,piece))
-        self.current_placements.append((used,piece))
+        named_piece = next(x for x in self.available_pieces if x.type == piece_type)
+        self.available_pieces.remove(named_piece)
+
+        self.pos[named_piece.index] = (x, y, orientation)
+
+        print(f'action taken: {named_piece.name}-{orientation} at grid pos {grid}')
+
+        self.step_sequence.append((named_piece.name,grid,orientation))
+        self.current_placements.append((chosen_landmark,named_piece))
 
         self.step += 1
-        extracted= self.extractor.extract(self.path, self.available_pieces, self.step)
 
-        if extracted[1]:
-            self.problem_placements.append((used,piece))
+        #generate the new imaginal
+        # extracted= self.extractor.extract(self.path, [x.type for x in self.available_pieces], self.step)
+        #
+        # if extracted[1]:
+        #     #the piece created an unfeasible region
+        #     self.problem_placements.append((chosen_landmark,named_piece))
 
-        self.current_imaginal = puzzle_state_to_imaginal(extracted)
+        #self.current_imaginal = puzzle_state_to_imaginal(extracted)
 
         return True
-
-    def make_move(self, piece, grid, orientation):
-        x,y = self.players_data.loc[(self.players_data.item == piece) & \
-                                          (self.players_data['grid_val'] == grid) & \
-                                          (self.players_data.rot == orientation)][['x','y']].iloc[0]
-        piece = next(x for x in self.available_pieces if x.type == piece)
-        piece_idx = piece.index
-        self.pos[piece_idx]= (x,y,orientation)
-        setpos(self.pos,self.sol)
-        return piece
 
 
 
@@ -139,32 +156,46 @@ class Puzzle():
         return True
 
     def region_backtrack(self):
+        landmark,named_piece = self.problem_placements.pop(0)
+        x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
+                                     (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
+        self.pos[named_piece.index] = (x, y, landmark.orientation)
+        self.available_pieces.append(named_piece)
+        print(f'backtracking piece: {named_piece.name}')
+        self.step_sequence.append((named_piece.name, -1, landmark.orientation))
+        self.current_placements.remove((landmark,named_piece))
+        self.step +=1
+
+        #extracted = self.extractor.extract(self.path, [x.type for x in self.available_pieces], self.step)
+
+        #self.current_imaginal = puzzle_state_to_imaginal(extracted)
         return True
 
-    def get_pieces(self):
-        state_def = ['isa', 'piece-state']
 
-        for p in set(self.available_pieces):
-            state_def.append(p)
-            state_def.append('t')
-        imaginal_chunk = actr.define_chunks(state_def)
-        actr.set_buffer_chunk('imaginal', imaginal_chunk)
-        return True
 
     def run(self, time=20):
-        self.path = f'{ROOT_DIR}/puzzle_state.png'
-        self.current_imaginal = puzzle_state_to_imaginal(self.extractor.extract(self.path, [x.type for x in self.available_pieces], self.step))
+
         actr.goal_focus('start')
         actr.run(time)
 
 
-def main():
-    #appscreen = ApplicationScreen(self.pos,new=False)
-    p = Puzzle(4)
-    setpos(p.pos,p.sol)
-    #p.appscreen.dump_gui()
-    p.run(0.5)
 
+def main():
+
+    p = Puzzle(4)
+    p.path= f'{ROOT_DIR}/puzzle_state.png'
+    setpos(p.pos,p.sol,True)
+
+    p.current_imaginal = puzzle_state_to_imaginal(
+        p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step))
+
+    for i in range(16):
+        p.run(2)
+        setpos(p.pos,p.sol)
+        extract =p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
+        if extract[1]:
+            p.problem_placements.append(p.current_placements[-1])
+        p.current_imaginal = puzzle_state_to_imaginal(extract)
 
 if __name__ == '__main__':
     main()

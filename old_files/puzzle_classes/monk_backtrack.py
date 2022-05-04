@@ -1,5 +1,5 @@
 from old_files.landmark import Landmark
-from backtracking_puzzle import Puzzle,puzzle_state_to_imaginal
+from old_files.backtracking_puzzle import Puzzle,puzzle_state_to_imaginal
 
 
 def generate_monk_ldm(unf_region_ldm):

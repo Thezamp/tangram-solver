@@ -68,7 +68,8 @@
   =imaginal>
   =goal>
     ISA  goal
-    state resolve-problem
+    ;;state resolve-problem
+    state wait
   )
 
 (P still-unfeasible "problem is still present"

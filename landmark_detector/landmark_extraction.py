@@ -109,12 +109,18 @@ def find_placements(piece, state_img, edged_image):
 
 
 class Template:
-    def __init__(self, name, path, rotations):
+    def __init__(self, name, path, rotations, flipped= False):
         self.name = name
         original_rotation = cv.imread(path, 0)
         t2, original_rotation = cv.threshold(original_rotation, 100, 1, cv.THRESH_BINARY)
 
         self.templates = generate_rotation_templates(original_rotation, rotations)
+        self.flipped = flipped
+    def describe(self):
+        if not self.flipped:
+            return self.name
+        else:
+            return "PARALL-INV"
 
 
 class LandmarkExtractor:
@@ -132,7 +138,7 @@ class LandmarkExtractor:
                        Template('MIDDLE-T',  f'{ROOT_DIR}/tans/middlet.png', 7),
                        Template('SQUARE',  f'{ROOT_DIR}/tans/square.png', 2),
                        Template('PARALL',  f'{ROOT_DIR}/tans/parall1.png', 3),
-                       Template('PARALL',  f'{ROOT_DIR}/tans/parall2.png', 7)
+                       Template('PARALL',  f'{ROOT_DIR}/tans/parall2.png', 3, flipped=True)
                        ]
         self.tgn = tgn
         self.counts = []
@@ -143,17 +149,17 @@ class LandmarkExtractor:
 
     def extract(self, image_path, pieces_list, step):
         counts = self.counts[step // 4]
-
+        #counts = self.counts[3]
         problem = False
         # binary image
         state = cv.imread(image_path, 0)
         #state = state[31:-1, 1:-1]
         state[500:, :] = 0
         _, state = cv.threshold(state, 240, 1, cv.THRESH_BINARY)
-
+        cv.imwrite('thresholded.png',state*255)
         # edges
         edged_image = cv.Canny(state * 255, 100, 200)
-
+        cv.imwrite('edged.png',edged_image)
         extracted_landmarks = set()
         for piece in [x for x in self.pieces_templates if x.name in pieces_list]:
 
@@ -172,8 +178,9 @@ class LandmarkExtractor:
                     if not row.empty:
                         ldm_count = row['counts'].values
                         #extracted_landmarks.add((piece.name, grid, rot, ldm_count[0]))
-                        piece_landmarks.add((piece.name, grid, rot, ldm_count[0]))
-            if len(piece_landmarks) == 0 and not piece_counts.empty and piece.name != 'PARALL':
+                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
+            # if len(piece_landmarks) == 0 and not piece_counts.empty and piece.name != 'PARALL':
+            if len(available_placements) == 0  and piece.name != 'PARALL':
                 problem = True
 
             extracted_landmarks.update(piece_landmarks)
@@ -183,19 +190,19 @@ class LandmarkExtractor:
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
 
 
-def main():
-    l = LandmarkExtractor(4)
-    start = time.time()
-    pieces_list = ['SMALL-T', 'BIG-T', 'MIDDLE-T', 'SQUARE', 'PARALL']
-    imaginal, problem = l.extract(f'{ROOT_DIR}/puzzle_state.png', pieces_list, 0)
-    print(time.time() - start)
-    print(imaginal)
-    print(problem)
-    print(len(imaginal))
-
-    # time.sleep(10)
-    return 0
-
-
-if __name__ == '__main__':
-    main()
+# def main():
+#     l = LandmarkExtractor(4)
+#     start = time.time()
+#     pieces_list = ['SMALL-T', 'BIG-T', 'MIDDLE-T', 'SQUARE', 'PARALL']
+#     imaginal, problem = l.extract(f'{ROOT_DIR}/puzzle_state.png', pieces_list, 0)
+#     print(time.time() - start)
+#     print(imaginal)
+#     print(problem)
+#     print(len(imaginal))
+#
+#     # time.sleep(10)
+#     return 0
+#
+#
+# if __name__ == '__main__':
+#     main()
