@@ -1,4 +1,5 @@
 import os
+import random
 
 import pandas as pd
 
@@ -123,10 +124,10 @@ class Puzzle():
             self.pos[7] = -1
             piece_type = 'PARALL'
         # generate the new picture
-        x, y = self.players_data.loc[(self.players_data.item == piece_type) & \
+        pixel_rows=  self.players_data.loc[(self.players_data.item == piece_type) & \
                                      (self.players_data['grid_val'] == grid) & \
-                                     (self.players_data.rot == orientation)][['x', 'y']].iloc[0]
-
+                                     (self.players_data.rot == orientation)][['x', 'y']]
+        x,y = pixel_rows.iloc[random.randint(0,len(pixel_rows))]
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
         self.available_pieces.remove(named_piece)
 

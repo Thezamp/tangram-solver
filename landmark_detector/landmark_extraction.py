@@ -88,7 +88,9 @@ def find_placements(piece, state_img, edged_image):
 
             res[xt:xb, yl:yr] = float('inf')
             central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)  # center of the bounding box
-            if (state_img[central_coord] == 1):
+            # if (state_img[central_coord] == 1):
+            part = state_img[min_loc[1]:min_loc[1]+h,min_loc[0]:min_loc[0]+w]
+            if np.count_nonzero(np.bitwise_and(part,current)-current) <100 :
                 # print((min_loc[1]+h//2,min_loc[0]+w//2))
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -155,6 +157,7 @@ class LandmarkExtractor:
         state = cv.imread(image_path, 0)
         #state = state[31:-1, 1:-1]
         state[500:, :] = 0
+        state= state[:,:450]
         _, state = cv.threshold(state, 240, 1, cv.THRESH_BINARY)
         cv.imwrite('thresholded.png',state*255)
         # edges
