@@ -74,7 +74,9 @@ def find_placements(piece, state_img, edged_image):
         h, w = current.shape[:2]
         method = cv.TM_SQDIFF
 
-        res = cv.matchTemplate(edged_image, edges, method, mask=current)
+        #res = cv.matchTemplate(edged_image, edges, method, mask=current)
+        res = cv.matchTemplate(edged_image, edges, method)
+
 
         i = 0
         attempt = 0
@@ -90,7 +92,7 @@ def find_placements(piece, state_img, edged_image):
             central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)  # center of the bounding box
             # if (state_img[central_coord] == 1):
             part = state_img[min_loc[1]:min_loc[1]+h,min_loc[0]:min_loc[0]+w]
-            if np.count_nonzero(np.bitwise_and(part,current)-current) <100 :
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part,current),current)) <50 :
                 # print((min_loc[1]+h//2,min_loc[0]+w//2))
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -183,13 +185,13 @@ class LandmarkExtractor:
                         #extracted_landmarks.add((piece.name, grid, rot, ldm_count[0]))
                         piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
             # if len(piece_landmarks) == 0 and not piece_counts.empty and piece.name != 'PARALL':
-            if len(available_placements) == 0  and piece.name != 'PARALL':
-                problem = True
+            # if len(available_placements) == 0  and piece.name != 'PARALL':
+            #     problem = True
 
             extracted_landmarks.update(piece_landmarks)
 
-        # if set([x[0] for x in extracted_landmarks]) != set(pieces_list):
-        #     problem = True
+        if set([x[0] for x in extracted_landmarks]) != set(pieces_list) and set(pieces_list).issubset(set(counts['item'].tolist())):
+            problem = True
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
 
 

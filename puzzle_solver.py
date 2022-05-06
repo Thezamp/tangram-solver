@@ -136,7 +136,7 @@ class Puzzle():
         pixel_rows=  self.players_data.loc[(self.players_data.item == piece_type) & \
                                      (self.players_data['grid_val'] == grid) & \
                                      (self.players_data.rot == orientation)][['x', 'y']]
-        x,y = pixel_rows.iloc[random.randint(0,len(pixel_rows))]
+        x,y = pixel_rows.iloc[random.randint(0,len(pixel_rows)-1)]
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
         self.available_pieces.remove(named_piece)
 
@@ -163,6 +163,7 @@ class Puzzle():
 
 
     def piece_backtrack(self):
+        print('to be implemented')
         return True
 
     def region_backtrack(self):
@@ -192,7 +193,7 @@ class Puzzle():
 
 def main():
 
-    p = Puzzle(4)
+    p = Puzzle(4,path ="ACT-R:tangram-solver;models;backtracking-solver-model.lisp")
     p.path= f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos,p.sol,True)
 

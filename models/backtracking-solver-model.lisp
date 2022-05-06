@@ -14,7 +14,7 @@
   (chunk-type puzzle-state
     PIECES-AVAILABLE
     LANDMARK-1 LANDMARK-2 LANDMARK-3 LANDMARK-4 LANDMARK-5 LANDMARK-6
-    EXISTS-UNFEASIBLE
+    SPECIAL-LANDMARK
     )
 
     (add-dm
@@ -48,7 +48,7 @@
 (P notice-problem "instead of landmarks, notice unfeasibility"
   =imaginal>
     ISA puzzle-state
-    - exists-unfeasible nil
+    - SPECIAL-LANDMARK nil
   =goal>
     ISA goal
     state choose-landmark
@@ -65,14 +65,14 @@
     state solve-problem
   =imaginal>
     isa puzzle-state
-    - exists-unfeasible nil
+    - SPECIAL-LANDMARK nil
 
   ==>
   !bind! =res ("region-backtrack")
   =imaginal>
   =goal>
     isa goal
-    state solve-problem
+    state wait
   )
 
 (P region-removed "now it's feasible again"
@@ -80,7 +80,7 @@
     ISA  goal
     state solve-problem
   =imaginal>
-    exists-unfeasible nil
+    SPECIAL-LANDMARK nil
   ==>
   =imaginal>
   =goal>
@@ -91,6 +91,7 @@
   =imaginal>
     ISA  puzzle-state
     pieces-available t
+    - landmark-1 nil
   =goal>
     isa goal
     state choose-landmark
