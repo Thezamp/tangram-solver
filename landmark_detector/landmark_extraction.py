@@ -43,7 +43,7 @@ def generate_rotation_templates(original, rotations):
     :param nparray original: the original uncropped template picture
     :param int rotations: number of rotations to be produced (varies due to symmetries)
 
-    :return list: the list of rotated and cropped templates
+    :return: the list of rotated and cropped templates
     '''
     original = original[3:,3:]
     nonzero = original.nonzero()
@@ -129,14 +129,6 @@ class Template:
 
 class LandmarkExtractor:
     def __init__(self, counts, tgn=4):
-        # this can be a list
-        # self.pieces = {'small_t': Template('SMALL-T', './tans/smallt.png', 7),
-        #                'big_t': Template('BIG-T', './tans/bigt.png', 7),
-        #                'middle_t': Template('MIDDLE-T', './tans/middlet.png', 7),
-        #                'square': Template('SQUARE', './tans/square.png', 2),
-        #                'parallelogram': Template('PARALL', './tans/parall1.png', 3),
-        #                'parallelogram_m': Template('PARALL', './tans/parall2.png', 7)
-        #                }
         self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 7),
                        Template('BIG-T',  f'{ROOT_DIR}/tans/bigt.png', 7),
                        Template('MIDDLE-T',  f'{ROOT_DIR}/tans/middlet.png', 7),
@@ -145,33 +137,30 @@ class LandmarkExtractor:
                        Template('PARALL',  f'{ROOT_DIR}/tans/parall2.png', 3, flipped=True)
                        ]
         self.tgn = tgn
-        # self.counts = []
-        # for phase in [4, 8, 12, 16]:
-        #     counts = pd.read_csv( f'{ROOT_DIR}/../datasets/landmark_counts_{phase}.csv')
-        #     self.counts.append(counts.loc[counts['tangram nr'] == tgn])
+
         self.counts = counts
 
     def extract(self, image_path, pieces_list, step):
         counts = self.counts[step // 4]
-        #counts = self.counts[3]
+
         problem = False
         # binary image
         state = cv.imread(image_path, 0)
-        #state = state[31:-1, 1:-1]
+
         state[500:, :] = 0
         state= state[:,:450]
         _, state = cv.threshold(state, 240, 1, cv.THRESH_BINARY)
-        cv.imwrite('thresholded.png',state*255)
+        cv.imwrite('./utility_pictures/thresholded.png',state*255)
         # edges
         edged_image = cv.Canny(state * 255, 100, 200)
-        cv.imwrite('edged.png',edged_image)
+        cv.imwrite('./utility_pictures/edged.png',edged_image)
         extracted_landmarks = set()
         for piece in [x for x in self.pieces_templates if x.name in pieces_list]:
 
             piece_counts = counts.loc[counts.item == piece.name]
             piece_landmarks = set()
             available_placements = find_placements(piece, state, edged_image)
-            # list of ((x,y),rot)
+
             for p in available_placements:
                 rot = p[1]
                 grid = get_grid_value(p[0][0], p[0][1], self.tgn)
@@ -182,11 +171,8 @@ class LandmarkExtractor:
                                      (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['counts'].values
-                        #extracted_landmarks.add((piece.name, grid, rot, ldm_count[0]))
                         piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
-            # if len(piece_landmarks) == 0 and not piece_counts.empty and piece.name != 'PARALL':
-            # if len(available_placements) == 0  and piece.name != 'PARALL':
-            #     problem = True
+
 
             extracted_landmarks.update(piece_landmarks)
 
@@ -194,20 +180,3 @@ class LandmarkExtractor:
             problem = True
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
 
-
-# def main():
-#     l = LandmarkExtractor(4)
-#     start = time.time()
-#     pieces_list = ['SMALL-T', 'BIG-T', 'MIDDLE-T', 'SQUARE', 'PARALL']
-#     imaginal, problem = l.extract(f'{ROOT_DIR}/puzzle_state.png', pieces_list, 0)
-#     print(time.time() - start)
-#     print(imaginal)
-#     print(problem)
-#     print(len(imaginal))
-#
-#     # time.sleep(10)
-#     return 0
-#
-#
-# if __name__ == '__main__':
-#     main()

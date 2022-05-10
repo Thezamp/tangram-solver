@@ -32,27 +32,35 @@ puzzle_def = {1: {'pos': [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 
               }
 
 
-def puzzle_state_to_imaginal(extracted,available):
-    """
-    sets the actr imaginal buffer
+def puzzle_state_to_imaginal(ldm_list,problem,available):
+    """sets the actr imaginal buffer
 
-    the imaginal buffer is so defined:
+    :param ldm_list: list of landmarks definitions
+    :type ldm_list: List
+    :param problem: whether to add the UNF-REG landmark
+    :type problem: Bool
+    :param available: whether there are still pieces available
+    :type available: Bool
+    :return current_imaginal: list of Landmarks defining the current imaginal buffer, for representation
+
+
+    The first 6 strongest landmarks are loaded into the ACT-R imaginal buffer. The rest are anyway added to the declarative
+    memory
+
+    The imaginal buffer is so defined:
     (chunk-type PUZZLE-STATE
         PIECES-AVAILABLE
         LANDMARK-1
         LANDMARK-2
         LANDMARK-3
         LANDMARK-4
-        LANDMARK-5yu
+        LANDMARK-5
         LANDMARK-6
         SPECIAL-LANDMARK
     )
 
     """
 
-
-    ldm_list = extracted[0]
-    problem = extracted[1]
     if available:
         state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'T']
     else:
@@ -62,8 +70,7 @@ def puzzle_state_to_imaginal(extracted,available):
         return []
 
     current_imaginal = []
-    flip = 1
-    #for i in range(len(ldm_list[0:6])):
+
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
         if i <6:
@@ -100,7 +107,7 @@ class Piece():
 
 
 class Puzzle():
-    ###NEED TO FIX PIECES AND LANDMARKS
+
     def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
 
 
@@ -141,8 +148,22 @@ class Puzzle():
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
     def update(self, piece_type, grid, orientation):
+        """Updates the state given an ACT-R chunk definition
 
-        # update the state
+        :param piece_type: piece in the landmark
+        :type piece_type: String
+        :param grid: grid position of the landmark
+        :type grid: int
+        :param orientation: rotation value of the landmark
+        :type orientation: int
+        :return: True
+
+        Once the landmark is extractedfrom the current imaginal, the state is updated.
+
+        Specifically, the first available piece of the given type is chosen and removed from the available ones.
+        The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
+        experiment window is taken from the human data
+        """
         chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, orientation)][
             0]  # landmark that has been selected
 
@@ -168,19 +189,9 @@ class Puzzle():
 
         self.step += 1
 
-        # generate the new imaginal
-        # extracted= self.extractor.extract(self.path, [x.type for x in self.available_pieces], self.step)
-        #
-        # if extracted[1]:
-        #     #the piece created an unfeasible region
-        #     self.problem_placements.append((chosen_landmark,named_piece))
-
-        # self.current_imaginal = puzzle_state_to_imaginal(extracted)
-
         return True
 
     def piece_backtrack(self):
-        #print('to be implemented')
 
         frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
         idx = frequencies.index(min(frequencies))
@@ -208,10 +219,6 @@ class Puzzle():
         self.step_sequence.append((named_piece.name, -1, landmark.orientation))
         self.current_placements.remove((landmark, named_piece))
         self.step += 1
-
-        # extracted = self.extractor.extract(self.path, [x.type for x in self.available_pieces], self.step)
-
-        # self.current_imaginal = puzzle_state_to_imaginal(extracted)
         return True
 
     def flag_completed(self):
@@ -230,8 +237,9 @@ def main():
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 
+    (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
     p.current_imaginal = puzzle_state_to_imaginal(
-        p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step), True)
+        extract,False, True)
 
     for i in range(15):
         if p.completed:
@@ -242,12 +250,12 @@ def main():
         p.run(2)
         setpos(p.pos, p.sol)
 
-        extract = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
-        if extract[1]:
+        (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
+        if problem:
             p.problem_placements.append(p.current_placements[-1])
-        if not extract[1] and len(p.problem_placements) != 0:
+        if not problem and len(p.problem_placements) != 0:
             p.problem_placements = []
-        p.current_imaginal = puzzle_state_to_imaginal(extract,len(p.available_pieces))
+        p.current_imaginal = puzzle_state_to_imaginal(extract,problem,len(p.available_pieces))
 
 
 if __name__ == '__main__':
