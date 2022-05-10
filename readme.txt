@@ -1,8 +1,9 @@
+### repository for thesis in Cognitive Modelling of Tangram Solving Behaviour ###
+
 The project folder needs to be in the ACT-R distribution folder so ACT-R/tangram-solver
+Due to the way Turtle window is defined, a screen resolution of 100% is required (some devices default at 125%)
 
-An example can be run as
-import actr
-import monk_oop
+Start ACT-R first
 
-m=monk_oop.Monk("ACT-R:tangram-solver;simple-model.lisp")
-m.run(10) ##atm it runs in ~9.6 sec
+Run by python .\puzzle_solver.py
+In order for the experiment window to be correctly captured, it has to be in foreground
