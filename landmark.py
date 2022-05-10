@@ -12,7 +12,7 @@ class Landmark:
         self.piece_type = landmark_def[0]
         self.grid = landmark_def[1]
         self.orientation = landmark_def[2]
-        #self.type = landmark_def[3]  # to move into weak/medium/strong
+        self.type = landmark_def[3]  # to move into weak/medium/strong
         self.name = f'{self.piece_type}-{self.grid}-{self.orientation}'
 
         self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type, "grid", self.grid, "orientation",
@@ -31,5 +31,5 @@ class Landmark:
     def get_frequency(self, df):
         row = df.loc[(df['item'] == self.piece_type) & (df['grid_val'] == self.grid) & \
                       (df['rot'] == self.orientation)]
-        return row['counts'].value
+        return row['counts'].values[0]
 

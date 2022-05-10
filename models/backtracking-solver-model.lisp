@@ -4,9 +4,9 @@
   (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
-  (sgp :ans 0.5) ;; noise
+  ;;(sgp :ans 0.5) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
-  (sgp :rt 1) ;; retrieval threshold
+  (sgp :rt 0.5) ;; retrieval threshold
 
 
   (chunk-type goal state piece-type location)
@@ -37,7 +37,7 @@
 
 
 (P fail-to-retrieve "only weak landmarks are left or a failure happens"
-  =retrieval>
+  ?retrieval>
     buffer failure
   =goal>
   ==>

@@ -63,12 +63,14 @@ def puzzle_state_to_imaginal(extracted,available):
 
     current_imaginal = []
     flip = 1
-    for i in range(len(ldm_list[0:6])):
+    #for i in range(len(ldm_list[0:6])):
+    for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
-        state_def.append(f'LANDMARK-{i + 1}')
+        if i <6:
+            state_def.append(f'LANDMARK-{i + 1}')
 
-        state_def.append(l.name)
-        current_imaginal.append(l)
+            state_def.append(l.name)
+            current_imaginal.append(l)
     if problem:
         state_def.append('SPECIAL-LANDMARK')
         state_def.append('UNF-REG')
