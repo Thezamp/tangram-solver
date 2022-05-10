@@ -4,9 +4,9 @@
   (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
-  (sgp :ans 0.2) ;; noise
+  (sgp :ans 0.5) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
-  ;;(sgp :rt 0.5) ;; retrieval threshold
+  (sgp :rt 1) ;; retrieval threshold
 
 
   (chunk-type goal state piece-type location)
@@ -29,6 +29,7 @@
     ISA goal
     state choose-landmark
   ==>
+  !bind! =res ("flag-completed")
   =imaginal>
   =goal>
     state stop
@@ -102,6 +103,7 @@
   +retrieval>
     ISA  landmark
     - piece-type nil
+    - piece-type UNF-PIECE
     :recently-retrieved nil
   =imaginal>
   =goal>
@@ -125,4 +127,6 @@
     state wait
   )
 
+(spp notice-problem :u 1.5)
+(spp retrieve-landmark :u 1)
 )

@@ -128,7 +128,7 @@ class Template:
 
 
 class LandmarkExtractor:
-    def __init__(self, tgn=4):
+    def __init__(self, counts, tgn=4):
         # this can be a list
         # self.pieces = {'small_t': Template('SMALL-T', './tans/smallt.png', 7),
         #                'big_t': Template('BIG-T', './tans/bigt.png', 7),
@@ -145,11 +145,11 @@ class LandmarkExtractor:
                        Template('PARALL',  f'{ROOT_DIR}/tans/parall2.png', 3, flipped=True)
                        ]
         self.tgn = tgn
-        self.counts = []
-        for phase in [4, 8, 12, 16]:
-            counts = pd.read_csv( f'{ROOT_DIR}/../datasets/landmark_counts_{phase}.csv')
-            self.counts.append(counts.loc[counts['tangram nr'] == tgn])
-
+        # self.counts = []
+        # for phase in [4, 8, 12, 16]:
+        #     counts = pd.read_csv( f'{ROOT_DIR}/../datasets/landmark_counts_{phase}.csv')
+        #     self.counts.append(counts.loc[counts['tangram nr'] == tgn])
+        self.counts = counts
 
     def extract(self, image_path, pieces_list, step):
         counts = self.counts[step // 4]
@@ -190,7 +190,7 @@ class LandmarkExtractor:
 
             extracted_landmarks.update(piece_landmarks)
 
-        if set([x[0] for x in extracted_landmarks]) != set(pieces_list) and set(pieces_list).issubset(set(counts['item'].tolist())):
+        if set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]) != set(pieces_list) and set(pieces_list).issubset(set(counts['item'].tolist())):
             problem = True
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
 
