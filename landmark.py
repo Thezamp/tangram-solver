@@ -52,5 +52,5 @@ class Landmark:
         """
         row = df.loc[(df['item'] == self.piece_type) & (df['grid_val'] == self.grid) & \
                       (df['rot'] == self.orientation)]
-        return row['counts'].values[0]
+        return row['counts'].values[0] if not row.empty else 0
 

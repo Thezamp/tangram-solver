@@ -103,7 +103,7 @@ def find_placements(piece, state_img, edged_image):
             central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)  # center of the bounding box
             # if (state_img[central_coord] == 1):
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
-            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 50:
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 30:
                 # print((min_loc[1]+h//2,min_loc[0]+w//2))
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -167,12 +167,16 @@ class LandmarkExtractor:
         edged_image = cv.Canny(state * 255, 100, 200)
         cv.imwrite('./utility_pictures/edged.png', edged_image)
         extracted_landmarks = set()
+        placeable_pieces = set()
         for piece in [x for x in self.pieces_templates if x.name in pieces_list]:
 
             piece_counts = counts.loc[counts.item == piece.name]
             piece_landmarks = set()
             available_placements = find_placements(piece, state, edged_image)
-
+            if len(available_placements) == 0:
+                print(f'{piece.name}:no placements found')
+            else:
+                placeable_pieces.add(piece.name if "PARALL" not in piece.name else "PARALL")
             for p in available_placements:
                 rot = p[1]
                 grid = get_grid_value(p[0][0], p[0][1], self.tgn)
@@ -185,9 +189,18 @@ class LandmarkExtractor:
                         piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
 
             extracted_landmarks.update(piece_landmarks)
+        # print(set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]))
+        print(placeable_pieces)
+        print(set(pieces_list))
+        # print(set(counts['item'].tolist()))
 
         # if set(pieces from extracted landmarks) != set(available pieces) and human data exists for all the available pieces at current time
-        if set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]) != set(pieces_list) and set(
-                pieces_list).issubset(set(counts['item'].tolist())):
+        # if set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]) != set(pieces_list) and set(pieces_list).issubset(set(counts['item'].tolist())):
+        # diff = set(pieces_list)  - set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks])
+        # print(diff)
+        print("#######################")
+        # if len(diff) != 0 and  diff.issubset(set(counts['item'].tolist())):
+        if placeable_pieces != set(pieces_list):
             problem = True
+
         return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem

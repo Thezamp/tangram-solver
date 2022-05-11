@@ -111,7 +111,8 @@ class Puzzle():
     def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
 
 
-        self.completed = False #needed because of act-r setup
+        self.completed = False
+        self.action_status = None
         self.actr_setup(path)
 
         self.pos = puzzle_def.get(tgn).get('pos')
@@ -127,6 +128,7 @@ class Puzzle():
         self.current_imaginal = []  # python equivalent of the imaginal buffer
         self.counts = []
         self.step = 0
+
 
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
@@ -164,6 +166,7 @@ class Puzzle():
         The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
         experiment window is taken from the human data
         """
+        self.action_status = 'updating'
         chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, orientation)][
             0]  # landmark that has been selected
 
@@ -192,7 +195,7 @@ class Puzzle():
         return True
 
     def piece_backtrack(self):
-
+        self.action_status = "piece_backtracking"
         frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
         idx = frequencies.index(min(frequencies))
 
@@ -210,6 +213,7 @@ class Puzzle():
         return True
 
     def region_backtrack(self):
+        self.action_status = "region_backtracking"
         landmark, named_piece = self.problem_placements.pop(0)
         x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
                                      (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
@@ -228,7 +232,7 @@ class Puzzle():
 
     def run(self, time=20):
 
-        actr.goal_focus('start')
+
         actr.run(time)
 
 
@@ -240,6 +244,7 @@ def main():
     (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
     p.current_imaginal = puzzle_state_to_imaginal(
         extract,False, True)
+    actr.goal_focus('start')
 
     for i in range(15):
         if p.completed:
@@ -251,10 +256,33 @@ def main():
         setpos(p.pos, p.sol)
 
         (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
-        if problem:
-            p.problem_placements.append(p.current_placements[-1])
-        if not problem and len(p.problem_placements) != 0:
+
+        if p.action_status == 'region_backtracking':
+            actr.goal_focus('is-backtracking')
+        else:
+            actr.goal_focus('start')
+            if problem:
+                p.problem_placements.append(p.current_placements[-1])
+
+        if (not problem) and len(p.problem_placements) != 0:
             p.problem_placements = []
+        # #the last action created a visible problem
+        # if problem and p.action_status == 'updating':
+        #     p.problem_placements.append(p.current_placements[-1])
+        #     actr.goal_focus('start')
+        # #the last action backtracked but the problem persists
+        # elif problem and p.action_status == 'region_backtracking':
+        #     #keep backtracking
+        #     actr.goal_focus('is-backtracking')
+        # #the last action backtracked and solved the problem
+        # elif (not problem) and (p.action_status == 'region_backtracking'):
+        #     #it will notice that the problem is solved
+        #     actr.goal_focus('is-backtracking')
+        #     if len(p.problem_placements) != 0:
+        #         p.problem_placements = []
+        # #all other cases
+        # else:
+        #     actr.goal_focus('start')
         p.current_imaginal = puzzle_state_to_imaginal(extract,problem,len(p.available_pieces))
 
 

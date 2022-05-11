@@ -19,6 +19,7 @@
 
     (add-dm
       (UNF-REG ISA LANDMARK piece-type UNF-PIECE grid BACKTRACK  )
+      (is-backtracking isa goal state solve-problem)
     )
 
 (P completed "all pieces have been used"
@@ -85,14 +86,14 @@
   ==>
   =imaginal>
   =goal>
-    state wait
+    state choose-landmark
   )
 
 (P retrieve-landmark "choose a landmark thanks to activation"
   =imaginal>
     ISA  puzzle-state
     pieces-available t
-    - landmark-1 nil
+  ;;  - landmark-1 nil
   =goal>
     isa goal
     state choose-landmark
