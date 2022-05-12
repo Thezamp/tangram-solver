@@ -1,6 +1,14 @@
 import actr
 
-saliency_dict = {'STRONG': 3, 'WEAK': 1, 'COMPOUND': 2, 'DERIVED': 2}
+activation_values = [1,1.2,1.5]
+
+
+def retrieve_activation(str):
+    level = int(str // 0.05)
+    if level >= 2:
+        level = 2
+
+    return activation_values[level]
 
 
 class Landmark:
@@ -19,16 +27,18 @@ class Landmark:
         Updates baseline activation depending on current strength (frequency count)
         """
         self.piece_type = landmark_def[0]
-        self.grid = landmark_def[1]
-        self.orientation = landmark_def[2]
-        self.type = landmark_def[3]  # to move into weak/medium/strong
+        self.x = landmark_def[1]
+        self.y = landmark_def[2]
+        self.grid = landmark_def[3]
+        self.orientation = landmark_def[4]
+        self.str = landmark_def[5]  # to move into weak/medium/strong
         self.name = f'{self.piece_type}-{self.grid}-{self.orientation}'
 
-        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type, "grid", self.grid, "orientation",
+        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type,"x",self.x,"y", self.y, "grid", self.grid, "orientation",
                           self.orientation]
         if not actr.chunk_p(self.name):
             actr.add_dm(self.chunk_def)
-        # actr.set_base_levels([self.name, saliency_dict.get(self.type)])
+        actr.set_base_levels([self.name,retrieve_activation(self.str)])
 
     def is_involved(self, piece, grid, orientation):
         """
@@ -50,7 +60,8 @@ class Landmark:
         :param df: the dataframe considered
         :return: frequency count
         """
-        row = df.loc[(df['item'] == self.piece_type) & (df['grid_val'] == self.grid) & \
+        pt = self.piece_type if "PARALL" not in self.piece_type else "PARALL"
+        row = df.loc[(df['item'] == pt) & (df['grid_val'] == self.grid) & \
                       (df['rot'] == self.orientation)]
-        return row['counts'].values[0] if not row.empty else 0
+        return row['strength'].values[0] if not row.empty else 0
 

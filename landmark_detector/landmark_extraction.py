@@ -39,7 +39,7 @@ def get_grid_value(rm, cm, tgn):
 
     ygrid = (y - yrange[0]) // ystep
 
-    return ygrid * 4 + xgrid
+    return x,y,ygrid * 4 + xgrid
 
 
 def generate_rotation_templates(original, rotations):
@@ -87,7 +87,7 @@ def find_placements(piece, state_img, edged_image):
         method = cv.TM_SQDIFF
 
         # res = cv.matchTemplate(edged_image, edges, method, mask=current)
-        res = cv.matchTemplate(edged_image, edges, method)
+        res = cv.matchTemplate(edged_image, edges, method,mask=current)
 
         i = 0
         attempt = 0
@@ -103,7 +103,7 @@ def find_placements(piece, state_img, edged_image):
             central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)  # center of the bounding box
             # if (state_img[central_coord] == 1):
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
-            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 30:
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 50:
                 # print((min_loc[1]+h//2,min_loc[0]+w//2))
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -179,14 +179,14 @@ class LandmarkExtractor:
                 placeable_pieces.add(piece.name if "PARALL" not in piece.name else "PARALL")
             for p in available_placements:
                 rot = p[1]
-                grid = get_grid_value(p[0][0], p[0][1], self.tgn)
+                x,y,grid = get_grid_value(p[0][0], p[0][1], self.tgn)
                 if grid != -1:
 
                     row = piece_counts.loc[(piece_counts['grid_val'] == grid) & \
                                            (piece_counts['rot'] == rot)]
                     if not row.empty:
-                        ldm_count = row['counts'].values
-                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
+                        ldm_count = row['strength'].values
+                        piece_landmarks.add((piece.describe(), x,y,grid, rot, ldm_count[0]))
 
             extracted_landmarks.update(piece_landmarks)
         # print(set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]))
@@ -203,4 +203,4 @@ class LandmarkExtractor:
         if placeable_pieces != set(pieces_list):
             problem = True
 
-        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
+        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[5]), problem

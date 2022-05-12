@@ -114,9 +114,10 @@ class Puzzle():
         self.completed = False
         self.action_status = None
         self.actr_setup(path)
+        self.tgn =tgn
 
-        self.pos = puzzle_def.get(tgn).get('pos')
-        self.sol = puzzle_def.get(tgn).get('sol')
+        self.pos = puzzle_def.get(tgn).get('pos').copy()
+        self.sol = puzzle_def.get(tgn).get('sol').copy()
         self.available_pieces = [Piece("SMALL-T-1", 'SMALL-T', 3), Piece("SMALL-T-2", 'SMALL-T', 4),
                                  Piece("MIDDLE-T", 'MIDDLE-T', 2),
                                  Piece("BIG-T-1", 'BIG-T', 0), Piece("BIG-T-2", 'BIG-T', 1),
@@ -134,7 +135,7 @@ class Puzzle():
         self.players_data = data.loc[data['tangram nr'] == tgn]
 
         for phase in [4, 8, 12, 16]:
-            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_counts_{phase}.csv')
+            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase+1}.csv')
             self.counts.append(phase_counts.loc[phase_counts['tangram nr'] == tgn])
 
         self.extractor = LandmarkExtractor(self.counts, tgn)
@@ -149,7 +150,7 @@ class Puzzle():
         actr.add_command("flag-completed", self.flag_completed)
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
-    def update(self, piece_type, grid, orientation):
+    def update(self, piece_type, x,y, grid, orientation):
         """Updates the state given an ACT-R chunk definition
 
         :param piece_type: piece in the landmark
@@ -176,10 +177,11 @@ class Puzzle():
             self.pos[7] = -1
             piece_type = 'PARALL'
         # generate the new picture
-        pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
-                                           (self.players_data['grid_val'] == grid) & \
-                                           (self.players_data.rot == orientation)][['x', 'y']]
-        x, y = pixel_rows.iloc[random.randint(0, len(pixel_rows) - 1)]
+        # pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
+        #                                    (self.players_data['grid_val'] == grid) & \
+        #                                    (self.players_data.rot == orientation)][['x', 'y']]
+        # x, y = pixel_rows.iloc[random.randint(0, len(pixel_rows) - 1)]
+
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
         self.available_pieces.remove(named_piece)
 
@@ -196,15 +198,19 @@ class Puzzle():
 
     def piece_backtrack(self):
         self.action_status = "piece_backtracking"
+        # frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
+        #the strength must be updated with the new phase
         frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
         idx = frequencies.index(min(frequencies))
 
         (landmark, named_piece) = self.current_placements.pop(idx)
 
-        x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
-                                     (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
+        # x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
+        #                              (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
+        #
+        # self.pos[named_piece.index] = (x, y, landmark.orientation)
 
-        self.pos[named_piece.index] = (x, y, landmark.orientation)
+        self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
         self.available_pieces.append(named_piece)
 
         print(f'backtracking weak piece: {named_piece.name}')
@@ -215,9 +221,11 @@ class Puzzle():
     def region_backtrack(self):
         self.action_status = "region_backtracking"
         landmark, named_piece = self.problem_placements.pop(0)
-        x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
-                                     (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
-        self.pos[named_piece.index] = (x, y, landmark.orientation)
+        # x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
+        #                              (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
+        # self.pos[named_piece.index] = (x, y, landmark.orientation)
+
+        self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
         self.available_pieces.append(named_piece)
         print(f'backtracking piece: {named_piece.name}')
         self.step_sequence.append((named_piece.name, -1, landmark.orientation))
@@ -237,7 +245,7 @@ class Puzzle():
 
 
 def main():
-    p = Puzzle(4, path="ACT-R:tangram-solver;models;backtracking-solver-model.lisp")
+    p = Puzzle(4, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 
@@ -266,23 +274,7 @@ def main():
 
         if (not problem) and len(p.problem_placements) != 0:
             p.problem_placements = []
-        # #the last action created a visible problem
-        # if problem and p.action_status == 'updating':
-        #     p.problem_placements.append(p.current_placements[-1])
-        #     actr.goal_focus('start')
-        # #the last action backtracked but the problem persists
-        # elif problem and p.action_status == 'region_backtracking':
-        #     #keep backtracking
-        #     actr.goal_focus('is-backtracking')
-        # #the last action backtracked and solved the problem
-        # elif (not problem) and (p.action_status == 'region_backtracking'):
-        #     #it will notice that the problem is solved
-        #     actr.goal_focus('is-backtracking')
-        #     if len(p.problem_placements) != 0:
-        #         p.problem_placements = []
-        # #all other cases
-        # else:
-        #     actr.goal_focus('start')
+
         p.current_imaginal = puzzle_state_to_imaginal(extract,problem,len(p.available_pieces))
 
 
