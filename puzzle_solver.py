@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 import pandas as pd
 
@@ -176,11 +177,12 @@ class Puzzle():
         if piece_type == 'PARALL-INV':
             self.pos[7] = -1
             piece_type = 'PARALL'
-        # generate the new picture
-        # pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
-        #                                    (self.players_data['grid_val'] == grid) & \
-        #                                    (self.players_data.rot == orientation)][['x', 'y']]
-        # x, y = pixel_rows.iloc[random.randint(0, len(pixel_rows) - 1)]
+
+        #generate the new picture
+        pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
+                                           (self.players_data['grid_val'] == grid) & \
+                                           (self.players_data.rot == orientation)][['x', 'y']]
+        x, y = pixel_rows.iloc[0]
 
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
         self.available_pieces.remove(named_piece)
@@ -215,7 +217,7 @@ class Puzzle():
 
         print(f'backtracking weak piece: {named_piece.name}')
         self.step_sequence.append((named_piece.name, -1, landmark.orientation))
-        self.step += 1
+        #self.step += 1
         return True
 
     def region_backtrack(self):
@@ -230,7 +232,7 @@ class Puzzle():
         print(f'backtracking piece: {named_piece.name}')
         self.step_sequence.append((named_piece.name, -1, landmark.orientation))
         self.current_placements.remove((landmark, named_piece))
-        self.step += 1
+        #self.step += 1
         return True
 
     def flag_completed(self):
@@ -245,7 +247,7 @@ class Puzzle():
 
 
 def main():
-    p = Puzzle(4, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(3, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 
@@ -260,6 +262,7 @@ def main():
             break
 
         print(f"STEP: {p.step}")
+        time.sleep(0.2)
         p.run(2)
         setpos(p.pos, p.sol)
 

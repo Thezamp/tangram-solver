@@ -15,7 +15,7 @@ solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def get_grid_value(rm, cm, tgn):
+def get_grid_value(rm, cm, n, tgn):
     '''
     Converts x and y matrix coordinates into grid values for tangram puzzle = tgn
 
@@ -23,6 +23,8 @@ def get_grid_value(rm, cm, tgn):
     :type rm: int
     :param cm: column value in matrix coordinates
     :type cm: int
+    :param n: grid size
+    :type n: int
     :return:  grid number 0-15, or -1 if outside the grid
     '''
 
@@ -31,15 +33,15 @@ def get_grid_value(rm, cm, tgn):
 
     xrange = solution_limits.get(tgn)[0]
     yrange = solution_limits.get(tgn)[1]
-    xstep = (xrange[1] - xrange[0]) / 4
-    ystep = (yrange[1] - yrange[0]) / 4
+    xstep = (xrange[1] - xrange[0]) / n
+    ystep = (yrange[1] - yrange[0]) / n
     if (x not in range(xrange[0], xrange[1] + 1) or y not in range(yrange[0], yrange[1] + 1)):
         return -1
     xgrid = (x - xrange[0]) // xstep
 
     ygrid = (y - yrange[0]) // ystep
 
-    return x,y,ygrid * 4 + xgrid
+    return x, y, ygrid * n + xgrid
 
 
 def generate_rotation_templates(original, rotations):
@@ -56,10 +58,12 @@ def generate_rotation_templates(original, rotations):
     original = original[3:, 3:]
     nonzero = original.nonzero()
     templates = [original[min(nonzero[0]) - 2:max(nonzero[0]) + 2, min(nonzero[1]) - 2:max(nonzero[1]) + 2]]
+
     for r in range(-45, -45 * rotations, -45):
         rotated = ndimage.rotate(original, r)
         nonzero = rotated.nonzero()
         rotated = rotated[min(nonzero[0]) - 2:max(nonzero[0]) + 2, min(nonzero[1]) - 2:max(nonzero[1]) + 2]
+
         templates.append(rotated)
 
     return templates
@@ -84,27 +88,32 @@ def find_placements(piece, state_img, edged_image):
         current = piece.templates[ti]
         edges = cv.Canny(current * 255, 100, 200)
         h, w = current.shape[:2]
+
         method = cv.TM_SQDIFF
 
         # res = cv.matchTemplate(edged_image, edges, method, mask=current)
-        res = cv.matchTemplate(edged_image, edges, method,mask=current)
+        res = cv.matchTemplate(edged_image, edges, method, mask=current)
 
         i = 0
         attempt = 0
         while i < 5 and attempt < 7:
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
 
+            # xtop, xbotto, yleft, yright
             xt = min_loc[1] - h // 2 if min_loc[1] > 20 else 0
             xb = min_loc[1] + h // 2 + 1
             yl = min_loc[0] - w // 2 if min_loc[0] > 20 else 0
             yr = min_loc[0] + w // 2 + 1
-
+            # removing the solution
             res[xt:xb, yl:yr] = float('inf')
+
+            # finding the central point
             central_coord = (min_loc[1] + h // 2, min_loc[0] + w // 2)  # center of the bounding box
-            # if (state_img[central_coord] == 1):
+
+            # check how much overlapping is present
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
             if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 50:
-                # print((min_loc[1]+h//2,min_loc[0]+w//2))
+
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
                         central_coord = (min_loc[1] + h - 2, min_loc[0] + w // 2)
@@ -179,27 +188,22 @@ class LandmarkExtractor:
                 placeable_pieces.add(piece.name if "PARALL" not in piece.name else "PARALL")
             for p in available_placements:
                 rot = p[1]
-                x,y,grid = get_grid_value(p[0][0], p[0][1], self.tgn)
+                x, y, grid = get_grid_value(p[0][0], p[0][1], 5, self.tgn)
                 if grid != -1:
 
                     row = piece_counts.loc[(piece_counts['grid_val'] == grid) & \
                                            (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['strength'].values
-                        piece_landmarks.add((piece.describe(), x,y,grid, rot, ldm_count[0]))
+                        piece_landmarks.add((piece.describe(), x, y, grid, rot, ldm_count[0]))
 
             extracted_landmarks.update(piece_landmarks)
-        # print(set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]))
+
         print(placeable_pieces)
         print(set(pieces_list))
-        # print(set(counts['item'].tolist()))
 
-        # if set(pieces from extracted landmarks) != set(available pieces) and human data exists for all the available pieces at current time
-        # if set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks]) != set(pieces_list) and set(pieces_list).issubset(set(counts['item'].tolist())):
-        # diff = set(pieces_list)  - set([x[0] if "PARALL" not in x[0] else "PARALL" for x in extracted_landmarks])
-        # print(diff)
         print("#######################")
-        # if len(diff) != 0 and  diff.issubset(set(counts['item'].tolist())):
+
         if placeable_pieces != set(pieces_list):
             problem = True
 
