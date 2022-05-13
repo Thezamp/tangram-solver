@@ -179,11 +179,15 @@ class Puzzle():
             piece_type = 'PARALL'
 
         #generate the new picture
-        pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
+        # pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
+        #                                    (self.players_data['grid_val'] == grid) & \
+        #                                    (self.players_data.rot == orientation)]
+        #
+        # x, y = pixel_rows[['x', 'y']].iloc[0]
+        pixel_rows = pd.DataFrame({'counts':self.players_data.loc[(self.players_data.item == piece_type) & \
                                            (self.players_data['grid_val'] == grid) & \
-                                           (self.players_data.rot == orientation)][['x', 'y']]
-        x, y = pixel_rows.iloc[0]
-
+                                           (self.players_data.rot == orientation)].groupby(['x','y']).size()} ).reset_index()
+        x,y = pixel_rows.sort_values(by='counts', ascending= False)[['x','y']].iloc[0]
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
         self.available_pieces.remove(named_piece)
 
