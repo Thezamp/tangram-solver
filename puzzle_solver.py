@@ -247,7 +247,7 @@ class Puzzle():
 
 
 def main():
-    p = Puzzle(3, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(4, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 

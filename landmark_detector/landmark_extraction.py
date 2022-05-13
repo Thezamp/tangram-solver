@@ -150,12 +150,12 @@ class Template:
 
 class LandmarkExtractor:
     def __init__(self, counts, tgn=4):
-        self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 7),
-                                 Template('BIG-T', f'{ROOT_DIR}/tans/bigt.png', 7),
-                                 Template('MIDDLE-T', f'{ROOT_DIR}/tans/middlet.png', 7),
-                                 Template('SQUARE', f'{ROOT_DIR}/tans/square.png', 2),
-                                 Template('PARALL', f'{ROOT_DIR}/tans/parall1.png', 3),
-                                 Template('PARALL', f'{ROOT_DIR}/tans/parall2.png', 3, flipped=True)
+        self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 8),
+                                 Template('BIG-T', f'{ROOT_DIR}/tans/bigt.png', 8),
+                                 Template('MIDDLE-T', f'{ROOT_DIR}/tans/middlet.png', 8),
+                                 Template('SQUARE', f'{ROOT_DIR}/tans/square.png', 3),
+                                 Template('PARALL', f'{ROOT_DIR}/tans/parall1.png', 4),
+                                 Template('PARALL', f'{ROOT_DIR}/tans/parall2.png', 4, flipped=True)
                                  ]
         self.tgn = tgn
 
