@@ -31,7 +31,7 @@ puzzle_def = {1: {'pos': [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 
               }
 
 
-def puzzle_state_to_imaginal(ldm_list,problem,available):
+def puzzle_state_to_imaginal(ldm_list, problem, available):
     """sets the actr imaginal buffer
 
     :param ldm_list: list of landmarks definitions
@@ -64,7 +64,7 @@ def puzzle_state_to_imaginal(ldm_list,problem,available):
         state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'T']
     else:
         state_def = ['isa', 'PUZZLE-STATE', 'PIECES-AVAILABLE', 'nil']
-        imaginal_chunk= actr.define_chunks(state_def)
+        imaginal_chunk = actr.define_chunks(state_def)
         actr.set_buffer_chunk('imaginal', imaginal_chunk)
         return []
 
@@ -72,7 +72,7 @@ def puzzle_state_to_imaginal(ldm_list,problem,available):
 
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
-        if i <6:
+        if i < 6:
             state_def.append(f'LANDMARK-{i + 1}')
 
             state_def.append(l.name)
@@ -92,12 +92,12 @@ class Piece():
         self.type = type
         self.used = False
         self.grid = -1
-        self.orientation = 0
+        self.rotation = 0
         self.index = index
 
-    def place(self, grid, orientation):
+    def place(self, grid, rotation):
         self.grid = grid
-        self.orientation = orientation
+        self.rotation = rotation
         self.used = True
 
     def remove(self):
@@ -109,11 +109,10 @@ class Puzzle():
 
     def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
 
-
-        self.completed = False
-        self.action_status = None
+        #self.completed = False
+        self.status = None
         self.actr_setup(path)
-        self.tgn =tgn
+        self.tgn = tgn
 
         self.pos = puzzle_def.get(tgn).get('pos').copy()
         self.sol = puzzle_def.get(tgn).get('sol').copy()
@@ -129,12 +128,11 @@ class Puzzle():
         self.counts = []
         self.step = 0
 
-
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
 
         for phase in [4, 8, 12, 16]:
-            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase+1}.csv')
+            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase + 1}.csv')
             self.counts.append(phase_counts.loc[phase_counts['tangram nr'] == tgn])
 
         self.extractor = LandmarkExtractor(self.counts, tgn)
@@ -149,15 +147,15 @@ class Puzzle():
         actr.add_command("flag-completed", self.flag_completed)
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
-    def update(self, piece_type, x,y, grid, orientation):
+    def update(self, piece_type, x, y, grid, rotation):
         """Updates the state given an ACT-R chunk definition
 
         :param piece_type: piece in the landmark
         :type piece_type: String
         :param grid: grid position of the landmark
         :type grid: int
-        :param orientation: rotation value of the landmark
-        :type orientation: int
+        :param rotation: rotation value of the landmark
+        :type rotation: int
         :return: True
 
         Once the landmark is extractedfrom the current imaginal, the state is updated.
@@ -166,31 +164,37 @@ class Puzzle():
         The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
         experiment window is taken from the human data
         """
-        self.action_status = 'updating'
-        chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, orientation)][
-            0]  # landmark that has been selected
-
+        self.status = 'updating'
+        try:
+            chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, rotation)][
+                0]  # landmark that has been selected
+            print('landmark')
+        except IndexError:
+            print('here')
         if piece_type == 'PARALL':
             self.pos[7] = 1
         if piece_type == 'PARALL-INV':
             self.pos[7] = -1
             piece_type = 'PARALL'
 
-        #generate the new picture
+        # generate the new picture
 
-         # x, y = pixel_rows[['x', 'y']].iloc[0]
-        pixel_rows = pd.DataFrame({'counts':self.players_data.loc[(self.players_data.item == piece_type) & \
-                                           (self.players_data['grid_val'] == grid) & \
-                                           (self.players_data.rot == orientation)].groupby(['x','y']).size()} ).reset_index()
-        x,y = pixel_rows.sort_values(by='counts', ascending= False)[['x','y']].iloc[0]
+        # x, y = pixel_rows[['x', 'y']].iloc[0]
+        pixel_rows = pd.DataFrame({'counts': self.players_data.loc[(self.players_data.item == piece_type) & \
+                                                                   (self.players_data['grid_val'] == grid) & \
+                                                                   (self.players_data.rot == rotation)].groupby(
+            ['x', 'y']).size()}).reset_index()
+        x, y = pixel_rows.sort_values(by='counts', ascending=False)[['x', 'y']].iloc[0]
+
         named_piece = next(x for x in self.available_pieces if x.type == piece_type)
+        print('piece')
         self.available_pieces.remove(named_piece)
+        print('removed')
+        self.pos[named_piece.index] = (x, y, rotation)
+        print(f'pos of {named_piece.index}')
+        print(f'action taken: {named_piece.name}-{rotation} at grid pos {grid}')
 
-        self.pos[named_piece.index] = (x, y, orientation)
-
-        print(f'action taken: {named_piece.name}-{orientation} at grid pos {grid}')
-
-        self.step_sequence.append((named_piece.name, grid, orientation))
+        self.step_sequence.append((named_piece.name, grid, rotation))
         self.current_placements.append((chosen_landmark, named_piece))
 
         self.step += 1
@@ -198,49 +202,42 @@ class Puzzle():
         return True
 
     def piece_backtrack(self):
-        self.action_status = "piece_backtracking"
+        self.status = "piece_backtracking"
         # frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
-        #the strength must be updated with the new phase
+        # the strength must be updated with the new phase
         frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
         idx = frequencies.index(min(frequencies))
 
         (landmark, named_piece) = self.current_placements.pop(idx)
 
-        # x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
-        #                              (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
-        #
-        # self.pos[named_piece.index] = (x, y, landmark.orientation)
-
         self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
         self.available_pieces.append(named_piece)
 
         print(f'backtracking weak piece: {named_piece.name}')
-        self.step_sequence.append((named_piece.name, -1, landmark.orientation))
-        #self.step += 1
+        self.step_sequence.append((named_piece.name, -1, landmark.rotation))
+        # self.step += 1
         return True
 
     def region_backtrack(self):
-        self.action_status = "region_backtracking"
+        self.status = "region_backtracking"
         landmark, named_piece = self.problem_placements.pop(0)
-        # x, y = self.players_data.loc[(self.players_data.item == named_piece.type) & \
-        #                              (self.players_data['grid_val'] == -1)][['x', 'y']].iloc[0]
-        # self.pos[named_piece.index] = (x, y, landmark.orientation)
 
         self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
         self.available_pieces.append(named_piece)
+
         print(f'backtracking piece: {named_piece.name}')
-        self.step_sequence.append((named_piece.name, -1, landmark.orientation))
+
+        self.step_sequence.append((named_piece.name, -1, landmark.rotation))
         self.current_placements.remove((landmark, named_piece))
-        #self.step += 1
+
         return True
 
     def flag_completed(self):
-        self.completed = True
+        self.status = "completed"
 
         return True
 
     def run(self, time=20):
-
 
         actr.run(time)
 
@@ -252,11 +249,11 @@ def main():
 
     (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
     p.current_imaginal = puzzle_state_to_imaginal(
-        extract,False, True)
+        extract, False, True)
     actr.goal_focus('start')
 
-    for i in range(15):
-        if p.completed:
+    while p.step < 16:
+        if p.status == 'completed':
             print("puzzle completed")
             break
 
@@ -267,7 +264,7 @@ def main():
 
         (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
 
-        if p.action_status == 'region_backtracking':
+        if p.status == 'region_backtracking':
             actr.goal_focus('is-backtracking')
         else:
             actr.goal_focus('start')
@@ -277,7 +274,7 @@ def main():
         if (not problem) and len(p.problem_placements) != 0:
             p.problem_placements = []
 
-        p.current_imaginal = puzzle_state_to_imaginal(extract,problem,len(p.available_pieces))
+        p.current_imaginal = puzzle_state_to_imaginal(extract, problem, len(p.available_pieces))
 
 
 if __name__ == '__main__':

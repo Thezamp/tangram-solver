@@ -4,13 +4,13 @@
   (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
-  ;;(sgp :ans 0.5) ;; noise
+  (sgp :ans 0.2) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
   (sgp :rt 2) ;; retrieval threshold
 
 
   (chunk-type goal state piece-type location)
-  (chunk-type landmark piece-type x y grid orientation)
+  (chunk-type landmark piece-type x y grid rotation)
   (chunk-type puzzle-state
     PIECES-AVAILABLE
     LANDMARK-1 LANDMARK-2 LANDMARK-3 LANDMARK-4 LANDMARK-5 LANDMARK-6
@@ -122,9 +122,9 @@
     x =x
     y =y
     grid =g
-    orientation =o
+    rotation =r
   ==>
-  !bind! =res ("update" =p =x =y =g =o)
+  !bind! =res ("update" =p =x =y =g =r)
   =goal>
     ISA  goal
     state wait
