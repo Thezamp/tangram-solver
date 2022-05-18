@@ -5,7 +5,6 @@ import pandas as pd
 import actr
 from landmark import Landmark
 from landmark_detector.landmark_extraction import LandmarkExtractor
-from application.application_screen import ApplicationScreen
 from application.create_state import setpos
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

@@ -1,5 +1,4 @@
 import os
-import random
 import time
 
 import pandas as pd
@@ -7,7 +6,6 @@ import pandas as pd
 import actr
 from landmark import Landmark
 from landmark_detector.landmark_extraction import LandmarkExtractor
-from application.application_screen import ApplicationScreen
 from application.create_state import setpos
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -179,11 +177,8 @@ class Puzzle():
             piece_type = 'PARALL'
 
         #generate the new picture
-        # pixel_rows = self.players_data.loc[(self.players_data.item == piece_type) & \
-        #                                    (self.players_data['grid_val'] == grid) & \
-        #                                    (self.players_data.rot == orientation)]
-        #
-        # x, y = pixel_rows[['x', 'y']].iloc[0]
+
+         # x, y = pixel_rows[['x', 'y']].iloc[0]
         pixel_rows = pd.DataFrame({'counts':self.players_data.loc[(self.players_data.item == piece_type) & \
                                            (self.players_data['grid_val'] == grid) & \
                                            (self.players_data.rot == orientation)].groupby(['x','y']).size()} ).reset_index()

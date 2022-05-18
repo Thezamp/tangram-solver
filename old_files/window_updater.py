@@ -33,7 +33,7 @@ def dump_gui():
     y0 = canvas.winfo_rooty()
     x1 = x0 + 800
     y1 = y0 + 600
-    ImageGrab.grab().crop((x0, y0, x1, y1)).save("gui_image_grabbed.png")
+    ImageGrab.grab().crop((x0, y0, x1, y1)).save("../application/gui_image_grabbed.png")
 
 
 def makerhomboidshapes():
