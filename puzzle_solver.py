@@ -10,6 +10,7 @@ from application.create_state import setpos
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+#big t, big t, middle t, small t, small t, square, parall
 puzzle_def = {1: {'pos': [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 49, 90), (250, -49, 0), (200, 0, 45),
                           (274, -74, 90), 1],
                   'sol': [(-100, 40, 0), (-100, -34, 135), (-172, -34, 180), (-65, 3, -45), (7, -69, -45), (-137, 3, 0),
@@ -82,7 +83,7 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
         state_def.append('UNF-REG')
 
     imaginal_chunk = actr.define_chunks(state_def)
-    actr.set_buffer_chunk('imaginal', imaginal_chunk)
+    actr.overwrite_buffer_chunk('imaginal', imaginal_chunk)
     return current_imaginal
 
 
@@ -107,11 +108,11 @@ class Piece():
 
 class Puzzle():
 
-    def __init__(self, tgn, path="ACT-R:tangram-solver;models;solver-model.lisp"):
+    def __init__(self, tgn, params_dict, path="ACT-R:tangram-solver;models;solver-model.lisp"):
 
         #self.completed = False
         self.status = None
-        self.actr_setup(path)
+        self.actr_setup(path, params_dict)
         self.tgn = tgn
 
         self.pos = puzzle_def.get(tgn).get('pos').copy()
@@ -137,9 +138,14 @@ class Puzzle():
 
         self.extractor = LandmarkExtractor(self.counts, tgn)
 
-    def actr_setup(self, path):
+    def actr_setup(self, path,params_dict):
+        actr.clear_all()
         actr.reset()
+
         actr.load_act_r_model(path)
+        for param_name in params_dict.keys():
+            actr.set_parameter_value(param_name, params_dict.get(param_name))
+
 
         actr.add_command("update", self.update)
         actr.add_command("piece-backtrack", self.piece_backtrack)
@@ -186,7 +192,8 @@ class Puzzle():
             ['x', 'y']).size()}).reset_index()
         x, y = pixel_rows.sort_values(by='counts', ascending=False)[['x', 'y']].iloc[0]
 
-        named_piece = next(x for x in self.available_pieces if x.type == piece_type)
+        # named_piece = next(x for x in self.available_pieces if x.type == piece_type)
+        named_piece = [x for x in self.available_pieces if x.type == piece_type][0]
         print('piece')
         self.available_pieces.remove(named_piece)
         print('removed')
@@ -242,8 +249,11 @@ class Puzzle():
         actr.run(time)
 
 
-def main():
-    p = Puzzle(4, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+def onerun(params_dict):
+    states=[]
+    p = Puzzle(4,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+
+
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 
@@ -253,8 +263,15 @@ def main():
     actr.goal_focus('start')
 
     while p.step < 16:
+
+
         if p.status == 'completed':
             print("puzzle completed")
+            i =  p.step //4
+            while i<4:
+                states.append(p.pos)
+                i+=1
+
             break
 
         print(f"STEP: {p.step}")
@@ -262,12 +279,16 @@ def main():
         p.run(2)
         setpos(p.pos, p.sol)
 
+
+
         (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
 
         if p.status == 'region_backtracking':
             actr.goal_focus('is-backtracking')
         else:
             actr.goal_focus('start')
+            if p.status == 'updating' and p.step % 4==0:
+                states.append(p.pos)
             if problem:
                 p.problem_placements.append(p.current_placements[-1])
 
@@ -276,6 +297,23 @@ def main():
 
         p.current_imaginal = puzzle_state_to_imaginal(extract, problem, len(p.available_pieces))
 
+    return states
+
+def main():
+    results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
+    grid_param = [{':rt':2,':mas':6},{':rt':2,':mas':7}]
+    for params_instance in grid_param:
+        steps = onerun(params_instance)
+        for i in range(len(steps)):
+            row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
+                   'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
+                   'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
+            results_df = results_df.append(row,ignore_index=True)
+
+    results_df.to_csv('param_search_results.csv')
 
 if __name__ == '__main__':
     main()
+
+
+#big t, big t, middle t, small t, small t, square, parall

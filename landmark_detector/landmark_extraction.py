@@ -162,7 +162,7 @@ class LandmarkExtractor:
         self.counts = counts
 
     def extract(self, image_path, pieces_list, step):
-        counts = self.counts[step // 4]
+        counts = self.counts[(step-1 )// 4]
 
         problem = False
         # binary image

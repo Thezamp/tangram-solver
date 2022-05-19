@@ -620,7 +620,8 @@ def model_output (output_string):
 
 def set_buffer_chunk (buffer_name, chunk_name, requested=True):
     return current_connection.evaluate_single("set-buffer-chunk",buffer_name,chunk_name,requested)
-
+def overwrite_buffer_chunk (buffer_name, chunk_name, requested=True):
+    return current_connection.evaluate_single("overwrite-buffer-chunk",buffer_name,chunk_name,requested)
 def add_line_to_exp_window (window, start, end, color = False):
     if color:
         return current_connection.evaluate_single("add-line-to-exp-window",window,start,end,color)
@@ -968,3 +969,6 @@ add_command("load-python-module-html",env_loader_no_path,"Import a python module
 
 def set_base_levels(*features):
     return current_connection.evaluate_single("set-base-levels", *features)
+
+def clear_all():
+    return current_connection.evaluate_single("clear-all")

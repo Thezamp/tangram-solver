@@ -4,10 +4,11 @@
   (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
-  (sgp :ans 0.2) ;; noise
+  (sgp :bll nil) ;; base-level-learning
+  ;;(sgp :ans 0.2) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
-  (sgp :rt 2) ;; retrieval threshold
-
+  ;;(sgp :rt 2.5) ;; retrieval threshold
+  (sgp :declarative-num-finsts 3)
 
   (chunk-type goal state piece-type location)
   (chunk-type landmark piece-type x y grid rotation)
@@ -107,6 +108,7 @@
     - piece-type UNF-PIECE
     :recently-retrieved nil
   =imaginal>
+
   =goal>
     state act-on-landmark
   )
@@ -124,6 +126,7 @@
     grid =g
     rotation =r
   ==>
+
   !bind! =res ("update" =p =x =y =g =r)
   =goal>
     ISA  goal
