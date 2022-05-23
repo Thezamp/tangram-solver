@@ -5,7 +5,7 @@
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
   (sgp :bll nil) ;; base-level-learning
-  ;;(sgp :ans 0.2) ;; noise
+  (sgp :ans 0.2) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
   ;;(sgp :rt 2.5) ;; retrieval threshold
   (sgp :declarative-num-finsts 3)
