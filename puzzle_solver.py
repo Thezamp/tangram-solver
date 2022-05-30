@@ -251,7 +251,7 @@ class Puzzle():
 
 def onerun(params_dict):
     states=[]
-    p = Puzzle(2,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(4,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
 
 
     p.path = f'{ROOT_DIR}/puzzle_state.png'
@@ -300,17 +300,18 @@ def onerun(params_dict):
     return states
 
 def main():
-    results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
-    grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
-    for params_instance in grid_param:
-        steps = onerun(params_instance)
-        for i in range(len(steps)):
-            row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
-                   'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
-                   'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
-            results_df = results_df.append(row,ignore_index=True)
-
-    results_df.to_csv('param_search_results.csv')
+    # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
+    # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
+    # for params_instance in grid_param:
+    #     steps = onerun(params_instance)
+    #     for i in range(len(steps)):
+    #         row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
+    #                'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
+    #                'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
+    #         results_df = results_df.append(row,ignore_index=True)
+    #
+    # results_df.to_csv('param_search_results.csv')
+    onerun({':rt':2.5,':mas':6})
 
 if __name__ == '__main__':
     main()
