@@ -41,7 +41,7 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
     :type problem: Bool
     :param available: whether there are still pieces available
     :type available: Bool
-    :return current_imaginal: list of Landmarks defining the current imaginal buffer, for representation
+    :return current_landmarks: list of Landmarks defining the current imaginal buffer, for representation
 
 
     The first 6 strongest landmarks are loaded into the ACT-R imaginal buffer. The rest are anyway added to the declarative
@@ -69,22 +69,23 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
         actr.set_buffer_chunk('imaginal', imaginal_chunk)
         return []
 
-    current_imaginal = []
+    current_landmarks = []
 
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
+        current_landmarks.append(l)
         if i < 6:
             state_def.append(f'LANDMARK-{i + 1}')
 
             state_def.append(l.name)
-            current_imaginal.append(l)
+
     if problem:
         state_def.append('SPECIAL-LANDMARK')
         state_def.append('UNF-REG')
 
     imaginal_chunk = actr.define_chunks(state_def)
     actr.overwrite_buffer_chunk('imaginal', imaginal_chunk)
-    return current_imaginal
+    return current_landmarks
 
 
 class Piece():
@@ -125,7 +126,7 @@ class Puzzle():
         self.current_placements = []  # what landmarks are actually used
         self.step_sequence = []  # sequence of all the steps
         self.problem_placements = []  # the landmarks that generated or are placed while there is an unfeasible region
-        self.current_imaginal = []  # python equivalent of the imaginal buffer
+        self.current_landmarks = []  # python equivalent of the imaginal buffer
         self.counts = []
         self.step = 0
 
@@ -172,7 +173,7 @@ class Puzzle():
         """
         self.status = 'updating'
         try:
-            chosen_landmark = [x for x in self.current_imaginal if x.is_involved(piece_type, grid, rotation)][
+            chosen_landmark = [x for x in self.current_landmarks if x.is_involved(piece_type, grid, rotation)][
                 0]  # landmark that has been selected
             print('landmark')
         except IndexError:
@@ -258,7 +259,7 @@ def onerun(params_dict):
     setpos(p.pos, p.sol, True)
 
     (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
-    p.current_imaginal = puzzle_state_to_imaginal(
+    p.current_landmarks = puzzle_state_to_imaginal(
         extract, False, True)
     actr.goal_focus('start')
 
@@ -295,7 +296,7 @@ def onerun(params_dict):
         if (not problem) and len(p.problem_placements) != 0:
             p.problem_placements = []
 
-        p.current_imaginal = puzzle_state_to_imaginal(extract, problem, len(p.available_pieces))
+        p.current_landmarks = puzzle_state_to_imaginal(extract, problem, len(p.available_pieces))
 
     return states
 
