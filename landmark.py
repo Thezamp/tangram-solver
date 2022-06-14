@@ -27,14 +27,12 @@ class Landmark:
         Updates baseline activation depending on current strength (frequency count)
         """
         self.piece_type = landmark_def[0]
-        self.x = landmark_def[1]
-        self.y = landmark_def[2]
-        self.grid = landmark_def[3]
-        self.rotation = landmark_def[4]
-        self.str = landmark_def[5]  # to move into weak/medium/strong
+        self.grid = landmark_def[1]
+        self.rotation = landmark_def[2]
+        self.str = landmark_def[3]  # to move into weak/medium/strong
         self.name = f'{self.piece_type}-{self.grid}-{self.rotation}'
 
-        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type,"x",self.x,"y", self.y, "grid", self.grid, "rotation",
+        self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type, "grid", self.grid, "rotation",
                           self.rotation]
         if not actr.chunk_p(self.name):
             actr.add_dm(self.chunk_def)

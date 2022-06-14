@@ -150,13 +150,21 @@ class Template:
 
 class LandmarkExtractor:
     def __init__(self, counts, tgn=4):
-        self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 8),
+        if tgn != 2 :
+            self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 8),
                                  Template('BIG-T', f'{ROOT_DIR}/tans/bigt.png', 8),
                                  Template('MIDDLE-T', f'{ROOT_DIR}/tans/middlet.png', 8),
                                  Template('SQUARE', f'{ROOT_DIR}/tans/square.png', 3),
                                  Template('PARALL', f'{ROOT_DIR}/tans/parall1.png', 4),
                                  Template('PARALL', f'{ROOT_DIR}/tans/parall2.png', 4, flipped=True)
                                  ]
+        else:
+            self.pieces_templates = [Template('SMALL-T', f'{ROOT_DIR}/tans/smallt.png', 8),
+                                     Template('BIG-T', f'{ROOT_DIR}/tans/bigt.png', 8),
+                                     Template('MIDDLE-T', f'{ROOT_DIR}/tans/middlet.png', 8),
+                                     Template('SQUARE', f'{ROOT_DIR}/tans/square.png', 3),
+                                     Template('PARALL', f'{ROOT_DIR}/tans/parall1.png', 4)
+                                     ]
         self.tgn = tgn
 
         self.counts = counts
@@ -195,7 +203,7 @@ class LandmarkExtractor:
                                            (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['strength'].values
-                        piece_landmarks.add((piece.describe(), x, y, grid, rot, ldm_count[0]))
+                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
 
             extracted_landmarks.update(piece_landmarks)
 
@@ -207,4 +215,4 @@ class LandmarkExtractor:
         if placeable_pieces != set(pieces_list):
             problem = True
 
-        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[5]), problem
+        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem

@@ -22,6 +22,7 @@
     (add-dm
       (UNF-REG ISA LANDMARK piece-type UNF-PIECE grid nil  )
       (is-backtracking isa goal state solve-problem)
+      (retrieve-ignoring-finsts isa goal state retrieve-ignoring)
     )
 
 (P completed "all pieces have been used"
@@ -114,6 +115,28 @@
     state act-on-landmark
   )
 
+(p retrieve-any-landmark "accept landmarks recently used"
+  =imaginal>
+    ISA  puzzle-state
+    pieces-available t
+  ;;  - landmark-1 nil
+  =goal>
+    isa goal
+    state retrieve-ignoring
+
+  ?retrieval>
+    state free
+  ==>
+  +retrieval>
+    ISA  landmark
+    - piece-type nil
+    - piece-type UNF-PIECE
+  =imaginal>
+
+  =goal>
+    state act-on-landmark
+)
+
 (P act-and-update "act on the landmark"
   =goal>
     ISA  goal
@@ -122,13 +145,11 @@
     isa landmark
     piece-type =p
     - piece-type UNF-PIECE
-    x =x
-    y =y
     grid =g
     rotation =r
   ==>
 
-  !bind! =res ("update" =p =x =y =g =r)
+  !bind! =res ("update" =p =g =r)
   =goal>
     ISA  goal
     state wait

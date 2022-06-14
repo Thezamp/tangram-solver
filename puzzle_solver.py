@@ -130,6 +130,7 @@ class Puzzle():
         self.current_landmarks = []  # python equivalent of the imaginal buffer
         self.counts = []
         self.step = 0
+        self.btsteps = 0
 
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
@@ -155,7 +156,7 @@ class Puzzle():
         actr.add_command("flag-completed", self.flag_completed)
         actr.add_dm(['start', 'isa', 'goal', 'state', 'choose-landmark'])
 
-    def update(self, piece_type, x, y, grid, rotation):
+    def update(self, piece_type, grid, rotation):
         """Updates the state given an ACT-R chunk definition
 
         :param piece_type: piece in the landmark
@@ -224,7 +225,8 @@ class Puzzle():
 
         print(f'backtracking weak piece: {named_piece.name}')
         self.step_sequence.append((named_piece.name, -1, landmark.rotation))
-        # self.step += 1
+        self.btsteps += 1
+
         return True
 
     def region_backtrack(self):
@@ -238,6 +240,7 @@ class Puzzle():
 
         self.step_sequence.append((named_piece.name, -1, landmark.rotation))
         self.current_placements.remove((landmark, named_piece))
+        self.btsteps += 1
 
         return True
 
@@ -264,7 +267,7 @@ def onerun(params_dict):
         extract, False, True)
     actr.goal_focus('start')
 
-    while p.step < 16:
+    while p.step < 16 and p.step+p.btsteps < 30:
 
 
         if p.status == 'completed':
@@ -288,7 +291,10 @@ def onerun(params_dict):
         if p.status == 'region_backtracking':
             actr.goal_focus('is-backtracking')
         else:
-            actr.goal_focus('start')
+            if p.status == 'piece_backtracking':
+                actr.goal_focus('retrieve-ignoring-finsts')
+            else:
+                actr.goal_focus('start')
             if p.status == 'updating' and p.step % 4==0:
                 states.append(p.pos)
             if problem:
@@ -322,13 +328,13 @@ def main():
     #
     # results_df.to_csv('param_search_results.csv')
     to_mat = []
-    for i in range(5):
+    for i in range(31):
         states, step_sequence = onerun({':rt':2.2,':mas':6})
         to_mat.append(seq_to_list(step_sequence))
 
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap.csv",mat,delimiter=',')
+    np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
 
 
 if __name__ == '__main__':
