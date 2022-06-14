@@ -9,6 +9,7 @@
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
   ;;(sgp :rt 2.5) ;; retrieval threshold
   (sgp :declarative-num-finsts 3)
+  ;;(sgp :bll 0.5 :ol t)
 
   (chunk-type goal state piece-type location)
   (chunk-type landmark piece-type x y grid rotation)

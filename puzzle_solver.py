@@ -1,6 +1,7 @@
 import os
 import time
 
+import numpy as np
 import pandas as pd
 
 import actr
@@ -298,7 +299,15 @@ def onerun(params_dict):
 
         p.current_landmarks = puzzle_state_to_imaginal(extract, problem, len(p.available_pieces))
 
-    return states
+    return states, p.step_sequence
+
+def seq_to_list(step_sequence):
+    conversion= {'SMALL-T-1':1, 'SMALL-T-2':1, "SQUARE":2, "PARALL":3,"MIDDLE-T": 4,
+                "BIG-T-1":5, "BIG-T-2":5 }
+    converted_steps= []
+    for step in step_sequence:
+        converted_steps.append(conversion.get(step[0]))
+    return converted_steps
 
 def main():
     # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
@@ -312,7 +321,15 @@ def main():
     #         results_df = results_df.append(row,ignore_index=True)
     #
     # results_df.to_csv('param_search_results.csv')
-    onerun({':rt':2.5,':mas':6})
+    to_mat = []
+    for i in range(5):
+        states, step_sequence = onerun({':rt':2.2,':mas':6})
+        to_mat.append(seq_to_list(step_sequence))
+
+    length = max(map(len, to_mat))
+    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+    np.savetxt("datasets/heatmap.csv",mat,delimiter=',')
+
 
 if __name__ == '__main__':
     main()
