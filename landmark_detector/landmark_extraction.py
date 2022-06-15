@@ -9,8 +9,7 @@ import time
 import os
 
 # limits of the grid defined by hand
-solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 3: [(-320, 60), (-140, 140)],
-                   4: [(-280, 0), (-200, 300)]}
+
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,7 +26,8 @@ def get_grid_value(rm, cm, n, tgn):
     :type n: int
     :return:  grid number 0-15, or -1 if outside the grid
     '''
-
+    solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 3: [(-320, 60), (-140, 140)],
+                       4: [(-280, 0), (-200, 300)]}
     y = -rm + 300
     x = cm - 400
 

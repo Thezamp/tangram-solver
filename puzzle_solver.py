@@ -6,7 +6,7 @@ import pandas as pd
 
 import actr
 from landmark import Landmark
-from landmark_detector.landmark_extraction import LandmarkExtractor
+from landmark_detector.landmark_extraction import LandmarkExtractor, get_grid_value
 from application.create_state import setpos
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -212,6 +212,7 @@ class Puzzle():
         return True
 
     def piece_backtrack(self):
+        self.btsteps += 1
         self.status = "piece_backtracking"
         # frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
         # the strength must be updated with the new phase
@@ -225,12 +226,13 @@ class Puzzle():
 
         print(f'backtracking weak piece: {named_piece.name}')
         self.step_sequence.append((named_piece.name, -1, landmark.rotation))
-        self.btsteps += 1
+
 
         return True
 
     def region_backtrack(self):
         self.status = "region_backtracking"
+        self.btsteps += 1
         landmark, named_piece = self.problem_placements.pop(0)
 
         self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
@@ -240,7 +242,7 @@ class Puzzle():
 
         self.step_sequence.append((named_piece.name, -1, landmark.rotation))
         self.current_placements.remove((landmark, named_piece))
-        self.btsteps += 1
+
 
         return True
 
@@ -253,6 +255,34 @@ class Puzzle():
 
         actr.run(time)
 
+    def save_state(self):
+        state= []
+        indexes = [[3,4],[2],[0,1],[5],[6]]
+        for i in range(len(indexes)):
+            piece_state = set()
+            for piece_index in indexes[i]:
+                p = self.pos[piece_index]
+                grid = self.grid_from_turtle(p[0], p[1])
+                if grid != -1:
+                    piece_state.add((grid,float(p[2])))
+            state.append(piece_state)
+
+        return state
+
+    def grid_from_turtle(self,x,y):
+        solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 3: [(-320, 60), (-140, 140)],
+                           4: [(-280, 0), (-200, 300)]}
+        xrange = solution_limits.get(self.tgn)[0]
+        yrange = solution_limits.get(self.tgn)[1]
+        xstep = (xrange[1] - xrange[0]) / 5
+        ystep = (yrange[1] - yrange[0]) / 5
+        if (x not in range(xrange[0], xrange[1] + 1) or y not in range(yrange[0], yrange[1] + 1)):
+            return -1
+        xgrid = (x - xrange[0]) // xstep
+
+        ygrid = (y - yrange[0]) // ystep
+
+        return ygrid * 5 + xgrid
 
 def onerun(params_dict):
     states=[]
@@ -272,9 +302,9 @@ def onerun(params_dict):
 
         if p.status == 'completed':
             print("puzzle completed")
-            i =  p.step //4
-            while i<4:
-                states.append(p.pos)
+            i =  p.step
+            while i<17:
+                states.append(p.save_state())
                 i+=1
 
             break
@@ -295,8 +325,8 @@ def onerun(params_dict):
                 actr.goal_focus('retrieve-ignoring-finsts')
             else:
                 actr.goal_focus('start')
-            if p.status == 'updating' and p.step % 4==0:
-                states.append(p.pos)
+            if p.status == 'updating':
+                states.append(p.save_state())
             if problem:
                 p.problem_placements.append(p.current_placements[-1])
 
@@ -329,17 +359,30 @@ def main():
     # results_df.to_csv('param_search_results.csv')
     to_mat = []
     for i in range(31):
-        states, step_sequence = onerun({':rt':2.2,':mas':6})
+        states, step_sequence = onerun({':rt':2.3,':mas':6})
         to_mat.append(seq_to_list(step_sequence))
 
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
     np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
 
-
+def create_state_evolution_df():
+    for i in range(31):
+        states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
 if __name__ == '__main__':
-    main()
+    # main()
+    results_df = pd.DataFrame(
+        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
+                 'parallelogram'])
+    for r in range(2):
+        s,_ = onerun({':rt': 2.2, ':mas': 6})
 
+        for i in range(len(s)):
+            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
+                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
+            results_df = results_df.append(row,ignore_index=True)
+
+    results_df.to_csv('datasets/model_states_evolution_4.csv')
 
 '''
 ### parameters that can be changed:
