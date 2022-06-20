@@ -112,7 +112,7 @@ def find_placements(piece, state_img, edged_image):
 
             # check how much overlapping is present
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
-            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 50:
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 100:
 
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
