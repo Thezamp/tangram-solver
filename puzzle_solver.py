@@ -179,7 +179,8 @@ class Puzzle():
                 0]  # landmark that has been selected
             print('landmark')
         except IndexError:
-            print('here')
+            print('retrieved wrong landmark')
+            return True
         if piece_type == 'PARALL':
             self.pos[7] = 1
         if piece_type == 'PARALL-INV':
@@ -286,7 +287,7 @@ class Puzzle():
 
 def onerun(params_dict):
     states=[]
-    p = Puzzle(4,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(2,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
 
 
     p.path = f'{ROOT_DIR}/puzzle_state.png'
@@ -345,6 +346,44 @@ def seq_to_list(step_sequence):
         converted_steps.append(conversion.get(step[0]))
     return converted_steps
 
+
+if __name__ == '__main__':
+    # main()
+    results_df = pd.DataFrame(
+        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
+                 'parallelogram'])
+    to_mat= []
+    for r in range(30):
+        s,step_sequence = onerun({':rt': 2.4, ':mas': 6})
+        to_mat.append(seq_to_list(step_sequence))
+
+        for i in range(len(s)):
+            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
+                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
+            results_df = results_df.append(row,ignore_index=True)
+
+    results_df.to_csv('datasets/model_states_evolution_2_large.csv')
+    length = max(map(len, to_mat))
+    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+    np.savetxt("datasets/heatmap_2_large.csv", mat, delimiter=',')
+
+
+'''
+### parameters that can be changed:
+rt, mas, ans
+bla based on strength
+strength distribution?
+finsts
+
+### possible tweaks:
+decreasing activation when backtracking
+
+### further steps:
+parameter tuning 
+results comparison function
+
+'''
+
 def main():
     # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
     # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
@@ -369,33 +408,3 @@ def main():
 def create_state_evolution_df():
     for i in range(31):
         states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
-if __name__ == '__main__':
-    # main()
-    results_df = pd.DataFrame(
-        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
-                 'parallelogram'])
-    for r in range(2):
-        s,_ = onerun({':rt': 2.2, ':mas': 6})
-
-        for i in range(len(s)):
-            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
-                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
-            results_df = results_df.append(row,ignore_index=True)
-
-    results_df.to_csv('datasets/model_states_evolution_4.csv')
-
-'''
-### parameters that can be changed:
-rt, mas, ans
-bla based on strength
-strength distribution?
-finsts
-
-### possible tweaks:
-decreasing activation when backtracking
-
-### further steps:
-parameter tuning 
-results comparison function
-
-'''

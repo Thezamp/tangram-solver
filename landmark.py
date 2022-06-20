@@ -1,6 +1,6 @@
 import actr
 
-activation_values = [1,1.2,1.5]
+activation_values = [1.4,1.6,1.8]
 
 
 def retrieve_activation(str):
