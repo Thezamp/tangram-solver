@@ -299,7 +299,7 @@ def onerun(params_dict):
     actr.goal_focus('start')
 
     #while p.step < 16 and p.step+p.btsteps < 30:
-    while p.step + p.btsteps < 22:
+    while p.step < 16 & p.step + p.btsteps < 28:
 
 
         if p.status == 'completed':
@@ -364,10 +364,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('datasets/model_states_evolution_4_twolevels.csv')
+    results_df.to_csv('datasets/model_states_evolution_4_large.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4_twolevels.csv", mat, delimiter=',')
+    np.savetxt("datasets/heatmap_4_large.csv", mat, delimiter=',')
 
 
 '''
