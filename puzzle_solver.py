@@ -173,14 +173,15 @@ class Puzzle():
         The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
         experiment window is taken from the human data
         """
+        if piece_type=='BIG-T' and grid ==17.0:
+            print('halt')
         self.status = 'updating'
         try:
             chosen_landmark = [x for x in self.current_landmarks if x.is_involved(piece_type, grid, rotation)][
                 0]  # landmark that has been selected
             print('landmark')
         except IndexError:
-            print('retrieved wrong landmark')
-            return True
+            return False
         if piece_type == 'PARALL':
             self.pos[7] = 1
         if piece_type == 'PARALL-INV':
@@ -197,12 +198,19 @@ class Puzzle():
         x, y = pixel_rows.sort_values(by='counts', ascending=False)[['x', 'y']].iloc[0]
 
         # named_piece = next(x for x in self.available_pieces if x.type == piece_type)
-        named_piece = [x for x in self.available_pieces if x.type == piece_type][0]
-        print('piece')
-        self.available_pieces.remove(named_piece)
-        print('removed')
-        self.pos[named_piece.index] = (x, y, rotation)
-        print(f'pos of {named_piece.index}')
+        try:
+            named_piece = [x for x in self.available_pieces if x.type == piece_type][0]
+        except IndexError:
+            return False
+        try:
+            self.available_pieces.remove(named_piece)
+        except IndexError:
+            return False
+        try:
+            self.pos[named_piece.index] = (x, y, rotation)
+        except IndexError:
+            return False
+        # print(f'pos of {named_piece.index}')
         print(f'action taken: {named_piece.name}-{rotation} at grid pos {grid}')
 
         self.step_sequence.append((named_piece.name, grid, rotation))
@@ -299,7 +307,7 @@ def onerun(params_dict):
     actr.goal_focus('start')
 
     #while p.step < 16 and p.step+p.btsteps < 30:
-    while p.step < 16 & p.step + p.btsteps < 28:
+    while p.step < 16 and p.step + p.btsteps < 28:
 
 
         if p.status == 'completed':

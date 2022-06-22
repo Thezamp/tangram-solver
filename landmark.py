@@ -29,7 +29,7 @@ class Landmark:
         self.piece_type = landmark_def[0]
         self.grid = landmark_def[1]
         self.rotation = landmark_def[2]
-        self.str = landmark_def[3]  # to move into weak/medium/strong
+        self.str = landmark_def[3] if landmark_def[3] > 0 else 0  # to move into weak/medium/strong
         self.name = f'{self.piece_type}-{self.grid}-{self.rotation}'
 
         self.chunk_def = [self.name, "isa", "landmark", "piece-type", self.piece_type, "grid", self.grid, "rotation",
