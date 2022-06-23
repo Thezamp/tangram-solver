@@ -1,7 +1,7 @@
 (clear-all)
 (define-model solver
 
-  (sgp :mas 7 :act nil :esc t) ;; associative str, ??, subsybolic compt
+  (sgp :mas 8 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
   (sgp :bll nil) ;; base-level-learning
