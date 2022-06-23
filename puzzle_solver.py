@@ -135,8 +135,9 @@ class Puzzle():
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
 
-        for phase in [4, 8, 12, 16]:
-            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase + 1}.csv')
+        #for phase in [5, 9, 13, 17]:
+        for phase in range(4):
+            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase}.csv')
             self.counts.append(phase_counts.loc[phase_counts['tangram nr'] == tgn])
 
         self.extractor = LandmarkExtractor(self.counts, tgn)
@@ -372,10 +373,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('datasets/model_states_evolution_4_narrow.csv')
+    results_df.to_csv('datasets/model_states_evolution_4_large.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4_narrow.csv", mat, delimiter=',')
+    np.savetxt("datasets/heatmap_4_large.csv", mat, delimiter=',')
 
 
 '''

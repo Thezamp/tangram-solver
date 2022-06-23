@@ -1,10 +1,10 @@
 import actr
 
-activation_values = [1.4,1.5,1.6]
+activation_values = [1.4,1.6,1.8]
 
 
 def retrieve_activation(str):
-    level = int(str // 0.05)
+    level = int(str // 0.06)
     if level >= 2:
         level = 2
 

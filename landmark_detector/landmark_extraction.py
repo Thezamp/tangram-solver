@@ -127,7 +127,7 @@ def find_placements(piece, state_img, edged_image):
                     elif ti == 6:
                         central_coord = (min_loc[1] + h // 2, min_loc[0] + w - 2)
 
-                available_placements.append((central_coord, ti * 45, min_val/(w*h)))
+                available_placements.append((central_coord, ti * 45, min_val/np.sum(current != 0)))
                 i += 1
 
             attempt += 1
@@ -172,7 +172,7 @@ class LandmarkExtractor:
 
         self.counts = counts
 
-    def extract(self, image_path, pieces_list, step):
+    def extract(self, image_path, pieces_list, step,k=1):
         counts = self.counts[(step )// 5]
 
         problem = False
@@ -208,7 +208,7 @@ class LandmarkExtractor:
                                            (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['strength'].values
-                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]-p[2]))
+                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]-k*p[2]))
 
             extracted_landmarks.update(piece_landmarks)
 
@@ -220,4 +220,4 @@ class LandmarkExtractor:
         if placeable_pieces != set(pieces_list):
             problem = True
 
-        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
+        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3])[0:6], problem
