@@ -74,8 +74,9 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
 
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
-        current_landmarks.append(l)
-        if i < 6:
+
+        if i < 6 and l.name not in [x.name for x in current_landmarks]:
+            current_landmarks.append(l)
             state_def.append(f'LANDMARK-{i + 1}')
 
             state_def.append(l.name)
@@ -135,8 +136,9 @@ class Puzzle():
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
 
-        for phase in [4, 8, 12, 16]:
-            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase + 1}.csv')
+        #for phase in [5, 9, 13, 17]:
+        for phase in range(4):
+            phase_counts = pd.read_csv(f'{ROOT_DIR}/datasets/landmark_str_{phase}.csv')
             self.counts.append(phase_counts.loc[phase_counts['tangram nr'] == tgn])
 
         self.extractor = LandmarkExtractor(self.counts, tgn)
@@ -173,14 +175,15 @@ class Puzzle():
         The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
         experiment window is taken from the human data
         """
+        if piece_type=='BIG-T' and grid ==17.0:
+            print('halt')
         self.status = 'updating'
         try:
             chosen_landmark = [x for x in self.current_landmarks if x.is_involved(piece_type, grid, rotation)][
                 0]  # landmark that has been selected
             print('landmark')
         except IndexError:
-            print('retrieved wrong landmark')
-            return True
+            return False
         if piece_type == 'PARALL':
             self.pos[7] = 1
         if piece_type == 'PARALL-INV':
@@ -197,12 +200,19 @@ class Puzzle():
         x, y = pixel_rows.sort_values(by='counts', ascending=False)[['x', 'y']].iloc[0]
 
         # named_piece = next(x for x in self.available_pieces if x.type == piece_type)
-        named_piece = [x for x in self.available_pieces if x.type == piece_type][0]
-        print('piece')
-        self.available_pieces.remove(named_piece)
-        print('removed')
-        self.pos[named_piece.index] = (x, y, rotation)
-        print(f'pos of {named_piece.index}')
+        try:
+            named_piece = [x for x in self.available_pieces if x.type == piece_type][0]
+        except IndexError:
+            return False
+        try:
+            self.available_pieces.remove(named_piece)
+        except IndexError:
+            return False
+        try:
+            self.pos[named_piece.index] = (x, y, rotation)
+        except IndexError:
+            return False
+        # print(f'pos of {named_piece.index}')
         print(f'action taken: {named_piece.name}-{rotation} at grid pos {grid}')
 
         self.step_sequence.append((named_piece.name, grid, rotation))
@@ -287,7 +297,7 @@ class Puzzle():
 
 def onerun(params_dict):
     states=[]
-    p = Puzzle(2,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(4,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
 
 
     p.path = f'{ROOT_DIR}/puzzle_state.png'
@@ -299,7 +309,7 @@ def onerun(params_dict):
     actr.goal_focus('start')
 
     #while p.step < 16 and p.step+p.btsteps < 30:
-    while p.step < 16 and p.step + p.btsteps < 28:
+    while p.step < 16 and p.step + p.btsteps < 22:
 
 
         if p.status == 'completed':
@@ -364,10 +374,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('datasets/model_states_evolution_4_large.csv')
+    results_df.to_csv('datasets/model_states_evolution_2_large.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4_large.csv", mat, delimiter=',')
+    np.savetxt("datasets/heatmap_2_large.csv", mat, delimiter=',')
 
 
 '''
@@ -386,27 +396,27 @@ results comparison function
 
 '''
 
-def main():
-    # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
-    # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
-    # for params_instance in grid_param:
-    #     steps = onerun(params_instance)
-    #     for i in range(len(steps)):
-    #         row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
-    #                'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
-    #                'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
-    #         results_df = results_df.append(row,ignore_index=True)
-    #
-    # results_df.to_csv('param_search_results.csv')
-    to_mat = []
-    for i in range(31):
-        states, step_sequence = onerun({':rt':2.3,':mas':6})
-        to_mat.append(seq_to_list(step_sequence))
-
-    length = max(map(len, to_mat))
-    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
-
-def create_state_evolution_df():
-    for i in range(31):
-        states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
+# def main():
+#     # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
+#     # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
+#     # for params_instance in grid_param:
+#     #     steps = onerun(params_instance)
+#     #     for i in range(len(steps)):
+#     #         row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
+#     #                'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
+#     #                'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
+#     #         results_df = results_df.append(row,ignore_index=True)
+#     #
+#     # results_df.to_csv('param_search_results.csv')
+#     to_mat = []
+#     for i in range(31):
+#         states, step_sequence = onerun({':rt':2.3,':mas':6})
+#         to_mat.append(seq_to_list(step_sequence))
+#
+#     length = max(map(len, to_mat))
+#     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+#     np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
+#
+# def create_state_evolution_df():
+#     for i in range(31):
+#         states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
