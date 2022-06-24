@@ -74,8 +74,9 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
 
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
-        current_landmarks.append(l)
-        if i < 6:
+
+        if i < 6 and l.name not in [x.name for x in current_landmarks]:
+            current_landmarks.append(l)
             state_def.append(f'LANDMARK-{i + 1}')
 
             state_def.append(l.name)
@@ -373,10 +374,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('datasets/model_states_evolution_4_large.csv')
+    results_df.to_csv('datasets/model_states_evolution_2_large.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4_large.csv", mat, delimiter=',')
+    np.savetxt("datasets/heatmap_2_large.csv", mat, delimiter=',')
 
 
 '''
@@ -395,27 +396,27 @@ results comparison function
 
 '''
 
-def main():
-    # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
-    # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
-    # for params_instance in grid_param:
-    #     steps = onerun(params_instance)
-    #     for i in range(len(steps)):
-    #         row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
-    #                'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
-    #                'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
-    #         results_df = results_df.append(row,ignore_index=True)
-    #
-    # results_df.to_csv('param_search_results.csv')
-    to_mat = []
-    for i in range(31):
-        states, step_sequence = onerun({':rt':2.3,':mas':6})
-        to_mat.append(seq_to_list(step_sequence))
-
-    length = max(map(len, to_mat))
-    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
-
-def create_state_evolution_df():
-    for i in range(31):
-        states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
+# def main():
+#     # results_df = pd.DataFrame(columns=['ans','rt','mas','step','small triangle', 'middle triangle','big triangle', 'square', 'parallelogram'])
+#     # grid_param = [{':rt':2,':mas':6},{':rt':2.5,':mas':6}, {':rt':2,':mas':7}, {':rt':2.5,':mas':7}]
+#     # for params_instance in grid_param:
+#     #     steps = onerun(params_instance)
+#     #     for i in range(len(steps)):
+#     #         row = {'ans':params_instance.get(':ans'), 'rt':params_instance.get(':rt'), 'mas':params_instance.get(':mas'),
+#     #                'step':(i+1)*4,'small triangle':[steps[i][3],steps[i][4]],'middle triangle':[steps[i][2]],
+#     #                'big triangle':[steps[i][0],steps[i][1]],'square':[steps[i][5]],'parallelogram':[steps[i][6]]}
+#     #         results_df = results_df.append(row,ignore_index=True)
+#     #
+#     # results_df.to_csv('param_search_results.csv')
+#     to_mat = []
+#     for i in range(31):
+#         states, step_sequence = onerun({':rt':2.3,':mas':6})
+#         to_mat.append(seq_to_list(step_sequence))
+#
+#     length = max(map(len, to_mat))
+#     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+#     np.savetxt("datasets/heatmap_4.csv",mat,delimiter=',')
+#
+# def create_state_evolution_df():
+#     for i in range(31):
+#         states, step_sequence = onerun({':rt': 2.2, ':mas': 6})
