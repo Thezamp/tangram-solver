@@ -26,7 +26,7 @@ def get_grid_value(rm, cm, n, tgn):
     :type n: int
     :return:  grid number 0-15, or -1 if outside the grid
     '''
-    solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-90, 210)], 3: [(-320, 60), (-140, 140)],
+    solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 3: [(-320, 60), (-140, 140)],
                        4: [(-280, 0), (-200, 300)]}
     y = -rm + 300
     x = cm - 400
@@ -83,13 +83,10 @@ def find_placements(piece, state_img, edged_image):
     :return: a list of possible (imprecise) placements for the given piece, in matrix coordinate
     :rtype: list[(int,int)]
     """
-
     available_placements = []
     for ti in range(len(piece.templates)):
         current = piece.templates[ti]
         edges = cv.Canny(current * 255, 100, 200)
-        _,edges = cv.threshold(edges, 100, 1, cv.THRESH_BINARY)
-
         h, w = current.shape[:2]
 
         method = cv.TM_SQDIFF
@@ -115,7 +112,7 @@ def find_placements(piece, state_img, edged_image):
 
             # check how much overlapping is present
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
-            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 70:
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 100:
 
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -127,7 +124,7 @@ def find_placements(piece, state_img, edged_image):
                     elif ti == 6:
                         central_coord = (min_loc[1] + h // 2, min_loc[0] + w - 2)
 
-                available_placements.append((central_coord, ti * 45, min_val/np.sum(current != 0)))
+                available_placements.append((central_coord, ti * 45))
                 i += 1
 
             attempt += 1
@@ -172,8 +169,8 @@ class LandmarkExtractor:
 
         self.counts = counts
 
-    def extract(self, image_path, pieces_list, step,k=1):
-        counts = self.counts[(step )// 5]
+    def extract(self, image_path, pieces_list, step):
+        counts = self.counts[(step-1 )// 4]
 
         problem = False
         # binary image
@@ -182,22 +179,20 @@ class LandmarkExtractor:
         state[500:, :] = 0
         state = state[:, :450]
         _, state = cv.threshold(state, 240, 1, cv.THRESH_BINARY)
-        binarized = np.where((state == 0) | (state == 1), state ^ 1, state)
         cv.imwrite('./utility_pictures/thresholded.png', state * 255)
         # edges
         edged_image = cv.Canny(state * 255, 100, 200)
-        _, edged_image_bin = cv.threshold(edged_image, 100, 1, cv.THRESH_BINARY)
-        edged_image_bin = edged_image_bin | binarized
-        cv.imwrite('./utility_pictures/edged.png', edged_image_bin)
+        cv.imwrite('./utility_pictures/edged.png', edged_image)
         extracted_landmarks = set()
         placeable_pieces = set()
         for piece in [x for x in self.pieces_templates if x.name in pieces_list]:
 
             piece_counts = counts.loc[counts.item == piece.name]
             piece_landmarks = set()
-            available_placements = find_placements(piece, state, edged_image_bin)
-            if len(available_placements) != 0:
-
+            available_placements = find_placements(piece, state, edged_image)
+            if len(available_placements) == 0:
+                print(f'{piece.name}:no placements found')
+            else:
                 placeable_pieces.add(piece.name if "PARALL" not in piece.name else "PARALL")
             for p in available_placements:
                 rot = p[1]
@@ -208,7 +203,7 @@ class LandmarkExtractor:
                                            (piece_counts['rot'] == rot)]
                     if not row.empty:
                         ldm_count = row['strength'].values
-                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]-k*p[2]))
+                        piece_landmarks.add((piece.describe(), grid, rot, ldm_count[0]))
 
             extracted_landmarks.update(piece_landmarks)
 
@@ -220,4 +215,4 @@ class LandmarkExtractor:
         if placeable_pieces != set(pieces_list):
             problem = True
 
-        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3])[0:6], problem
+        return sorted(list(extracted_landmarks), reverse=True, key=lambda x: x[3]), problem
