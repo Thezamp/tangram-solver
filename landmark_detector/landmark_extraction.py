@@ -13,7 +13,8 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
+global solution_limits
+solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-105,185)], 3: [(-320, 60), (-140, 140)], 4: [(-280, 0), (-200, 300)]}
 def get_grid_value(rm, cm, n, tgn):
     '''
     Converts x and y matrix coordinates into grid values for tangram puzzle = tgn
@@ -26,8 +27,9 @@ def get_grid_value(rm, cm, n, tgn):
     :type n: int
     :return:  grid number 0-15, or -1 if outside the grid
     '''
-    solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-90, 210)], 3: [(-320, 60), (-140, 140)],
-                       4: [(-280, 0), (-200, 300)]}
+    # solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-70, 210)], 3: [(-320, 60), (-140, 140)],
+    #                    4: [(-280, 0), (-200, 300)]}
+    global solution_limits
     y = -rm + 300
     x = cm - 400
 
@@ -116,7 +118,7 @@ def find_placements(piece, state_img, edged_image):
 
             # check how much overlapping is present
             part = state_img[min_loc[1]:min_loc[1] + h, min_loc[0]:min_loc[0] + w]
-            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 50:
+            if np.count_nonzero(np.bitwise_xor(np.bitwise_and(part, current), current)) < 60:
 
                 if '-T' in piece.name:  # coordinates in the app are calculated on the long side
                     if ti == 0:
@@ -173,7 +175,7 @@ class LandmarkExtractor:
 
         self.counts = counts
 
-    def extract(self, image_path, pieces_list, step,kd=1,kcv=1):
+    def extract(self, image_path, pieces_list, step,kd=0,kcv=-2):
         counts = self.counts[(step+1 )// 5]
 
         problem = False
@@ -203,7 +205,7 @@ class LandmarkExtractor:
 
             piece_counts = counts.loc[counts.item == piece.name]
             piece_landmarks = set()
-            available_placements = find_placements(piece, state, np.logical_xor(edged_image_bin,1))
+            available_placements = find_placements(piece, state, edged_image_bin)
             if len(available_placements) != 0:
 
                 placeable_pieces.add(piece.name if "PARALL" not in piece.name else "PARALL")

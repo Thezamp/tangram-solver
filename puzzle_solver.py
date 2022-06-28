@@ -6,10 +6,11 @@ import pandas as pd
 
 import actr
 from landmark import Landmark
-from landmark_detector.landmark_extraction import LandmarkExtractor, get_grid_value
+from landmark_detector.landmark_extraction import LandmarkExtractor, get_grid_value, solution_limits
 from application.create_state import setpos
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 #big t, big t, middle t, small t, small t, square, parall
 puzzle_def = {1: {'pos': [(250, 99, 180), (349, 0, 270), (200, -49, 225), (151, 49, 90), (250, -49, 0), (200, 0, 45),
@@ -245,18 +246,19 @@ class Puzzle():
     def region_backtrack(self):
         self.status = "region_backtracking"
         self.btsteps += 1
-        landmark, named_piece = self.problem_placements.pop(0)
+        if len(self.problem_placements) != 0:
+            landmark, named_piece = self.problem_placements.pop(0)
 
-        self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
-        self.available_pieces.append(named_piece)
+            self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
+            self.available_pieces.append(named_piece)
 
-        print(f'backtracking piece: {named_piece.name}')
+            print(f'backtracking piece: {named_piece.name}')
 
-        self.step_sequence.append((named_piece.name, -1, landmark.rotation))
-        self.current_placements.remove((landmark, named_piece))
-
-
-        return True
+            self.step_sequence.append((named_piece.name, -1, landmark.rotation))
+            self.current_placements.remove((landmark, named_piece))
+            return True
+        else:
+            return self.piece_backtrack()
 
     def flag_completed(self):
         self.status = "completed"
@@ -282,8 +284,9 @@ class Puzzle():
         return state
 
     def grid_from_turtle(self,x,y):
-        solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-90, 210)], 3: [(-320, 60), (-140, 140)],
-                           4: [(-280, 0), (-200, 300)]}
+        # solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-70, 210)], 3: [(-320, 60), (-140, 140)],
+        #                    4: [(-280, 0), (-200, 300)]}
+        global solution_limits
         xrange = solution_limits.get(self.tgn)[0]
         yrange = solution_limits.get(self.tgn)[1]
         xstep = (xrange[1] - xrange[0]) / 5
@@ -367,7 +370,7 @@ if __name__ == '__main__':
     to_mat= []
     for r in range(30):
         print(f'puzzle {r}')
-        s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 8})
+        s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 10})
         to_mat.append(seq_to_list(step_sequence))
 
         for i in range(len(s)):
@@ -375,10 +378,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('results/model_states_evolution_2_mixed.csv')
+    results_df.to_csv('results/model_states_evolution_2_no_data.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("results/heatmap_2_mixed.csv", mat, delimiter=',')
+    np.savetxt("results/heatmap_2_no_data.csv", mat, delimiter=',')
 
 
 '''
