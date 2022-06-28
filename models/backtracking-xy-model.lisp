@@ -5,7 +5,7 @@
   (sgp :model-warnings nil)
   (sgp :v t) ;; trace
   (sgp :bll nil) ;; base-level-learning
-  (sgp :ans 0.2) ;; noise
+  (sgp :ans 0.3) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
   ;;(sgp :rt 2.5) ;; retrieval threshold
   (sgp :declarative-num-finsts 3)
@@ -44,6 +44,18 @@
   ?retrieval>
     buffer failure
   =goal>
+  ==>
+  !bind! =res ("piece-backtrack")
+  =goal>
+    state wait
+  )
+
+  (P no-landmarks "pieces are available but cannot find any landmark"
+  =imaginal>
+    pieces-available t
+    landmark1 nil
+  =goal>
+    state choose-landmark
   ==>
   !bind! =res ("piece-backtrack")
   =goal>
@@ -96,7 +108,7 @@
   =imaginal>
     ISA  puzzle-state
     pieces-available t
-  ;;  - landmark-1 nil
+    - landmark-1 nil
   =goal>
     isa goal
     state choose-landmark

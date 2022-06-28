@@ -71,15 +71,16 @@ def puzzle_state_to_imaginal(ldm_list, problem, available):
         return []
 
     current_landmarks = []
-
+    ldm_i = 0
     for i in range(len(ldm_list)):
         l = Landmark(ldm_list[i])
 
-        if i < 6 and l.name not in [x.name for x in current_landmarks]:
+        if len(current_landmarks) < 6 and l.name not in [x.name for x in current_landmarks]:
             current_landmarks.append(l)
-            state_def.append(f'LANDMARK-{i + 1}')
+            state_def.append(f'LANDMARK-{ldm_i + 1}')
 
             state_def.append(l.name)
+            ldm_i +=1
 
     if problem:
         state_def.append('SPECIAL-LANDMARK')
@@ -281,7 +282,7 @@ class Puzzle():
         return state
 
     def grid_from_turtle(self,x,y):
-        solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, -20), (-80, 200)], 3: [(-320, 60), (-140, 140)],
+        solution_limits = {1: [(-260, 120), (-120, 140)], 2: [(-280, 0), (-90, 210)], 3: [(-320, 60), (-140, 140)],
                            4: [(-280, 0), (-200, 300)]}
         xrange = solution_limits.get(self.tgn)[0]
         yrange = solution_limits.get(self.tgn)[1]
@@ -295,9 +296,9 @@ class Puzzle():
 
         return ygrid * 5 + xgrid
 
-def onerun(params_dict):
+def onerun(pzn,params_dict):
     states=[]
-    p = Puzzle(4,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(pzn,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
 
 
     p.path = f'{ROOT_DIR}/puzzle_state.png'
@@ -309,7 +310,7 @@ def onerun(params_dict):
     actr.goal_focus('start')
 
     #while p.step < 16 and p.step+p.btsteps < 30:
-    while p.step < 16 and p.step + p.btsteps < 22:
+    while p.step < 18 and p.step + p.btsteps < 31:
 
 
         if p.status == 'completed':
@@ -366,7 +367,7 @@ if __name__ == '__main__':
     to_mat= []
     for r in range(30):
         print(f'puzzle {r}')
-        s,step_sequence = onerun({':rt': 2.4, ':mas': 6})
+        s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 8})
         to_mat.append(seq_to_list(step_sequence))
 
         for i in range(len(s)):
@@ -374,10 +375,10 @@ if __name__ == '__main__':
                            'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
             results_df = results_df.append(row,ignore_index=True)
 
-    results_df.to_csv('datasets/model_states_evolution_2_large.csv')
+    results_df.to_csv('results/model_states_evolution_2_mixed.csv')
     length = max(map(len, to_mat))
     mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("datasets/heatmap_2_large.csv", mat, delimiter=',')
+    np.savetxt("results/heatmap_2_mixed.csv", mat, delimiter=',')
 
 
 '''
