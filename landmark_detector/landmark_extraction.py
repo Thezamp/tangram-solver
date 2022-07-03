@@ -175,7 +175,7 @@ class LandmarkExtractor:
 
         self.counts = counts
 
-    def extract(self, image_path, pieces_list, step,kd=0,kcv=-2):
+    def extract(self, image_path, pieces_list, step,kd=1,kcv=-2):
         counts = self.counts[(step+1 )// 5]
 
         problem = False

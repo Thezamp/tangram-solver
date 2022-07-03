@@ -120,7 +120,7 @@
     ISA  landmark
     - piece-type nil
     - piece-type UNF-PIECE
-    :recently-retrieved nil
+;;    :recently-retrieved nil
   =imaginal>
 
   =goal>

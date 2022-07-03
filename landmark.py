@@ -4,12 +4,12 @@ activation_values = [1.4,1.45,1.5]
 
 
 def retrieve_activation(str):
-    level = int(str // 0.06)
-    if level >= 2:
-        level = 2
-
-    return activation_values[level]
-
+    # level = int(str // 0.06)
+    # if level >= 2:
+    #     level = 2
+    #
+    # return activation_values[level]
+    return 1 + str
 
 class Landmark:
     """

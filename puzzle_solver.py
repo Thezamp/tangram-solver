@@ -113,7 +113,7 @@ class Piece():
 
 class Puzzle():
 
-    def __init__(self, tgn, params_dict, path="ACT-R:tangram-solver;models;solver-model.lisp"):
+    def __init__(self, tgn, params_dict, path="ACT-R:tangram-solver;models;solver-model.lisp", predictor = False):
 
         #self.completed = False
         self.status = None
@@ -134,6 +134,8 @@ class Puzzle():
         self.counts = []
         self.step = 0
         self.btsteps = 0
+        self.predictor = predictor
+        self.prediction_answer = ('Start', None)
 
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
@@ -177,6 +179,14 @@ class Puzzle():
         The tuple (Piece, Landmark) is added to the step sequence and to the current placements. The position in the
         experiment window is taken from the human data
         """
+        if self.predictor:
+            print(f'Suggest update {piece_type}, {rotation} at {grid} ')
+            if piece_type != 'PARALL-INV':
+                self.prediction_answer = ('Place', (piece_type,int(grid),int(rotation)))
+            else:
+                self.prediction_answer = ('Place', ('PARALL', int(grid), int(rotation)))
+            return True
+
         if piece_type=='BIG-T' and grid ==17.0:
             print('halt')
         self.status = 'updating'
@@ -225,6 +235,10 @@ class Puzzle():
         return True
 
     def piece_backtrack(self):
+        if self.predictor:
+            print('Suggest backtracking weak piece')
+            self.prediction_answer = ('Backtrack',None)
+            return True
         self.btsteps += 1
         self.status = "piece_backtracking"
         # frequencies = [l.get_frequency(self.counts[self.step // 4]) for (l, p) in self.current_placements]
@@ -244,6 +258,10 @@ class Puzzle():
         return True
 
     def region_backtrack(self):
+        if self.predictor:
+            print('Suggest backtracking problem piece')
+            self.prediction_answer = ('Backtrack', None)
+            return  True
         self.status = "region_backtracking"
         self.btsteps += 1
         if len(self.problem_placements) != 0:
@@ -298,6 +316,85 @@ class Puzzle():
         ygrid = (y - yrange[0]) // ystep
 
         return ygrid * 5 + xgrid
+
+def prediction_run(pzn,params_dict):
+    steps =  pd.read_csv('./datasets/all_steps.csv')
+    steps = steps.loc[steps['tangram nr'] == pzn]
+
+
+    acc =[]
+
+
+    for participant in steps.sid.unique()[:4]:
+        score = 0
+        max_score = 0
+        p = Puzzle(pzn, params_dict, path="ACT-R:tangram-solver;models;predictor-model.lisp", predictor=True)
+        p.path = f'{ROOT_DIR}/puzzle_state.png'
+        if pzn == 4:
+            p.pos[-1] = -1
+        setpos(p.pos, p.sol, True)
+
+        participant_steps = steps.loc[steps.sid == participant]
+        pieces = [['BIG-T',True],['BIG-T',True],['MIDDLE-T',True],['SMALL-T',True],['SMALL-T',True],['SQUARE',True],['PARALL',True]]
+        p.step = 0
+
+        for i_step in range(len(participant_steps)-2):
+            row = participant_steps.iloc[i_step]
+            if p.step >16:
+                break
+
+
+            partial = participant_steps[:i_step+1]
+
+
+            print(f'participant action: {row["item"]}, {row.rot} at {row.grid_val} ')
+            print('###')
+            p.pos[row['i_item']] = (row.x,row.y,row.rot)
+            setpos(p.pos, p.sol)
+            for pi in participant_steps.i_item.unique():
+                pos = partial.loc[partial.i_item == pi]
+                if pos.empty:
+                    pieces[pi][1] = True
+                elif pos.iloc[-1]['step'] == 100:
+                    pieces[pi][1] = True
+                else:
+                    pieces[pi][1] = False
+
+            available_pieces = [p[0] for p in pieces if p[1]]
+
+            #Agent Part - prediction
+            if row['step'] != 100.0:
+                max_score += 1
+                p.step = int(row.step)+1
+                print(p.step)
+                (extract, problem) = p.extractor.extract(p.path, available_pieces, p.step)
+
+
+
+
+
+                p.current_landmarks = puzzle_state_to_imaginal(extract, problem, len(available_pieces))
+                actr.goal_focus('start')
+                p.run()
+
+                if p.prediction_answer[0] == 'Place':
+                    p_move = p.prediction_answer[1]
+                    next_row = participant_steps.iloc[i_step+1]
+                    second_next_row = participant_steps.iloc[i_step +2]
+                    print(f'next: {(next_row["item"],int(next_row["grid_val"]),int(next_row["rot"]))} ')
+                    print(f'second next: {(second_next_row["item"], int(second_next_row["grid_val"]), int(second_next_row["rot"]))}  ')
+                    if (p_move == (next_row['item'],int(next_row['grid_val']),int(next_row['rot'])) or
+                            p_move == (second_next_row['item'], int(second_next_row['grid_val']), int(second_next_row['rot'])) ):
+                        score +=1
+                elif p.prediction_answer[0] == 'Backtrack':
+                    print(participant_steps.iloc[i_step+1]['step'])
+                    print(participant_steps.iloc[i_step+2]['step'])
+                    if (participant_steps.iloc[i_step+1]['step'] == 100
+                            or participant_steps.iloc[i_step+2]['step'] == 100):
+                        score +=1
+        acc.append(score/max_score)
+    print(acc)
+    return acc
 
 def onerun(pzn,params_dict):
     states=[]
@@ -364,25 +461,25 @@ def seq_to_list(step_sequence):
 
 if __name__ == '__main__':
     # main()
-    results_df = pd.DataFrame(
-        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
-                 'parallelogram'])
-    to_mat= []
-    for r in range(30):
-        print(f'puzzle {r}')
-        s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 10})
-        to_mat.append(seq_to_list(step_sequence))
-
-        for i in range(len(s)):
-            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
-                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
-            results_df = results_df.append(row,ignore_index=True)
-
-    results_df.to_csv('results/model_states_evolution_2_no_data.csv')
-    length = max(map(len, to_mat))
-    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("results/heatmap_2_no_data.csv", mat, delimiter=',')
-
+    # results_df = pd.DataFrame(
+    #     columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
+    #              'parallelogram'])
+    # to_mat= []
+    # for r in range(30):
+    #     print(f'puzzle {r}')
+    #     s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 10})
+    #     to_mat.append(seq_to_list(step_sequence))
+    #
+    #     for i in range(len(s)):
+    #         row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
+    #                        'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
+    #         results_df = results_df.append(row,ignore_index=True)
+    #
+    # results_df.to_csv('results/model_states_evolution_2_mixed_cnt.csv')
+    # length = max(map(len, to_mat))
+    # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+    # np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
+    prediction_run(4,{':rt': 2.5, ':mas': 10})
 
 '''
 ### parameters that can be changed:
