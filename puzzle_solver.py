@@ -135,7 +135,7 @@ class Puzzle():
         self.step = 0
         self.btsteps = 0
         self.predictor = predictor
-        self.prediction_answer = ('Start', None)
+        self.prediction_answer = []
 
         data = pd.read_csv(f'{ROOT_DIR}/datasets/steps.csv')
         self.players_data = data.loc[data['tangram nr'] == tgn]
@@ -182,9 +182,9 @@ class Puzzle():
         if self.predictor:
             print(f'Suggest update {piece_type}, {rotation} at {grid} ')
             if piece_type != 'PARALL-INV':
-                self.prediction_answer = ('Place', (piece_type,int(grid),int(rotation)))
+                self.prediction_answer.append(('Place', (piece_type,int(grid),int(rotation))))
             else:
-                self.prediction_answer = ('Place', ('PARALL', int(grid), int(rotation)))
+                self.prediction_answer.append(('Place', ('PARALL', int(grid), int(rotation))))
             return True
 
         if piece_type=='BIG-T' and grid ==17.0:
@@ -237,7 +237,7 @@ class Puzzle():
     def piece_backtrack(self):
         if self.predictor:
             print('Suggest backtracking weak piece')
-            self.prediction_answer = ('Backtrack',None)
+            self.prediction_answer.append(('Backtrack',None))
             return True
         self.btsteps += 1
         self.status = "piece_backtracking"
@@ -260,7 +260,7 @@ class Puzzle():
     def region_backtrack(self):
         if self.predictor:
             print('Suggest backtracking problem piece')
-            self.prediction_answer = ('Backtrack', None)
+            self.prediction_answer.append(('Backtrack', None))
             return  True
         self.status = "region_backtracking"
         self.btsteps += 1
@@ -339,6 +339,7 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
         p.step = 0
 
         for i_step in range(len(participant_steps)-2):
+            p.prediction_answer=[]
             row = participant_steps.iloc[i_step]
             if p.step >16:
                 break
@@ -372,13 +373,14 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
 
 
 
+                for i in range(10):
+                    p.current_landmarks = puzzle_state_to_imaginal(extract, problem, len(available_pieces))
+                    actr.goal_focus('start')
+                    p.run()
 
-                p.current_landmarks = puzzle_state_to_imaginal(extract, problem, len(available_pieces))
-                actr.goal_focus('start')
-                p.run()
-
-                if p.prediction_answer[0] == 'Place':
-                    p_move = p.prediction_answer[1]
+                answer = max(set(p.prediction_answer), key=p.prediction_answer.count)
+                if answer[0] == 'Place':
+                    p_move = answer[1]
                     next_row = participant_steps.iloc[i_step+1]
                     second_next_row = participant_steps.iloc[i_step +2]
                     print(f'next: {(next_row["item"],int(next_row["grid_val"]),int(next_row["rot"]))} ')
@@ -386,7 +388,7 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
                     if (p_move == (next_row['item'],int(next_row['grid_val']),int(next_row['rot'])) or
                             p_move == (second_next_row['item'], int(second_next_row['grid_val']), int(second_next_row['rot'])) ):
                         score +=1
-                elif p.prediction_answer[0] == 'Backtrack':
+                elif answer[0] == 'Backtrack':
                     print(participant_steps.iloc[i_step+1]['step'])
                     print(participant_steps.iloc[i_step+2]['step'])
                     if (participant_steps.iloc[i_step+1]['step'] == 100
@@ -480,7 +482,7 @@ if __name__ == '__main__':
     # length = max(map(len, to_mat))
     # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
     # np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
-    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=0,kcv=3)
+    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=0, kcv=3)
 
 '''
 ### parameters that can be changed:
