@@ -378,7 +378,7 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
                     actr.goal_focus('start')
                     p.run()
 
-                answer = max(set(p.prediction_answer), key=p.prediction_answer.count)
+                answer = max(set(p.prediction_answer), key=p.prediction_answer.count) if len(p.prediction_answer) else ['Skip',None]
                 if answer[0] == 'Place':
                     p_move = answer[1]
                     next_row = participant_steps.iloc[i_step+1]
