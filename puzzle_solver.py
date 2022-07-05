@@ -317,7 +317,7 @@ class Puzzle():
 
         return ygrid * 5 + xgrid
 
-def prediction_run(pzn,params_dict):
+def prediction_run(pzn,params_dict,kd=1,kcv=2):
     steps =  pd.read_csv('./datasets/all_steps.csv')
     steps = steps.loc[steps['tangram nr'] == pzn]
 
@@ -325,7 +325,7 @@ def prediction_run(pzn,params_dict):
     acc =[]
 
 
-    for participant in steps.sid.unique()[:4]:
+    for participant in steps.sid.unique():
         score = 0
         max_score = 0
         p = Puzzle(pzn, params_dict, path="ACT-R:tangram-solver;models;predictor-model.lisp", predictor=True)
@@ -367,7 +367,7 @@ def prediction_run(pzn,params_dict):
                 max_score += 1
                 p.step = int(row.step)+1
                 print(p.step)
-                (extract, problem) = p.extractor.extract(p.path, available_pieces, p.step)
+                (extract, problem) = p.extractor.extract(p.path, available_pieces, p.step,kd=kd,kcv=kcv)
 
 
 
@@ -394,6 +394,7 @@ def prediction_run(pzn,params_dict):
                         score +=1
         acc.append(score/max_score)
     print(acc)
+    print(np.mean(acc))
     return acc
 
 def onerun(pzn,params_dict):
@@ -479,7 +480,7 @@ if __name__ == '__main__':
     # length = max(map(len, to_mat))
     # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
     # np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
-    prediction_run(4,{':rt': 2.5, ':mas': 10})
+    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=0,kcv=3)
 
 '''
 ### parameters that can be changed:
