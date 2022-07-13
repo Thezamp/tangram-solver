@@ -3,7 +3,7 @@
 
   (sgp :mas 8 :act nil :esc t) ;; associative str, ??, subsybolic compt
   (sgp :model-warnings nil)
-  (sgp :v t) ;; trace
+  (sgp :v nil) ;; trace
   (sgp :bll nil) ;; base-level-learning
   (sgp :ans 0.2) ;; noise
   ;; (sgp :ga 3) ;; goal activation is used for trying to retrieve a piece, or fail
@@ -120,7 +120,7 @@
     ISA  landmark
     - piece-type nil
     - piece-type UNF-PIECE
-    :recently-retrieved nil
+;;    :recently-retrieved nil
   =imaginal>
 
   =goal>

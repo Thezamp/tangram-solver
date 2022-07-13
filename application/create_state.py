@@ -9,7 +9,7 @@ a = A / 4.0
 d = a * 2 ** .5
 
 pencolor = '#1c267c'
-fillcolors = ['#2951d4', '#21949b', '#8f7ba3', '#3a557e', '#8b37d8', '#57539b', '#2582b1']
+fillcolors = ['#2951d4', '#b02912', '#8f7ba3', '#3a557e', '#8b37d8', '#57539b', '#2582b1']
 
 
 class TStein(Turtle):
