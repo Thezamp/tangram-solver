@@ -318,7 +318,7 @@ class Puzzle():
         return ygrid * 5 + xgrid
 
 def prediction_run(pzn,params_dict,kd=1,kcv=2):
-    steps =  pd.read_csv('./datasets/all_steps.csv')
+    steps =  pd.read_csv('./datasets/all_steps_test_ZAL.csv')
     steps = steps.loc[steps['tangram nr'] == pzn]
 
 
@@ -482,7 +482,7 @@ if __name__ == '__main__':
     # length = max(map(len, to_mat))
     # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
     # np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
-    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=0, kcv=3)
+    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=1, kcv=3)
 
 '''
 ### parameters that can be changed:
