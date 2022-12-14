@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import actr
-from landmark import Landmark
+from landmark import Landmark,retrieve_activation
 from landmark_detector.landmark_extraction import LandmarkExtractor, get_grid_value, solution_limits
 from application.create_state import setpos
 
@@ -248,6 +248,11 @@ class Puzzle():
 
         (landmark, named_piece) = self.current_placements.pop(idx)
 
+
+        #new part
+
+        active_actions = [x for x in self.current_landmarks].sort(key= lambda x: retrieve_activation(x.str))
+        ###
         self.pos[named_piece.index] = puzzle_def.get(self.tgn).get('pos')[named_piece.index]
         self.available_pieces.append(named_piece)
 
@@ -464,25 +469,25 @@ def seq_to_list(step_sequence):
 
 if __name__ == '__main__':
     # main()
-    # results_df = pd.DataFrame(
-    #     columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
-    #              'parallelogram'])
-    # to_mat= []
-    # for r in range(30):
-    #     print(f'puzzle {r}')
-    #     s,step_sequence = onerun(2,{':rt': 2.5, ':mas': 10})
-    #     to_mat.append(seq_to_list(step_sequence))
-    #
-    #     for i in range(len(s)):
-    #         row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
-    #                        'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
-    #         results_df = results_df.append(row,ignore_index=True)
-    #
-    # results_df.to_csv('results/model_states_evolution_2_mixed_cnt.csv')
-    # length = max(map(len, to_mat))
-    # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    # np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
-    prediction_run(2,{':rt': 2.5, ':mas': 10},kd=1, kcv=3)
+    results_df = pd.DataFrame(
+        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
+                 'parallelogram'])
+    to_mat= []
+    for r in range(30):
+        print(f'puzzle {r}')
+        s,step_sequence = onerun(4,{':rt': 2.5, ':mas': 10})
+        to_mat.append(seq_to_list(step_sequence))
+
+        for i in range(len(s)):
+            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
+                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
+            results_df = results_df.append(row,ignore_index=True)
+
+    results_df.to_csv('results/model_states_evolution_2_mixed_cnt.csv')
+    length = max(map(len, to_mat))
+    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+    np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
+    #prediction_run(2,{':rt': 2.5, ':mas': 10},kd=1, kcv=3)
 
 '''
 ### parameters that can be changed:
