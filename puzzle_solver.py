@@ -323,12 +323,10 @@ class Puzzle():
         return ygrid * 5 + xgrid
 
 def prediction_run(pzn,params_dict,kd=1,kcv=2):
-    steps =  pd.read_csv('./datasets/all_steps_test_ZAL.csv')
+    steps =  pd.read_csv('./datasets/all_steps_test_paper.csv')
     steps = steps.loc[steps['tangram nr'] == pzn]
 
-
     acc =[]
-
 
     for participant in steps.sid.unique():
         score = 0
@@ -349,14 +347,14 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
             if p.step >16:
                 break
 
-
-            partial = participant_steps[:i_step+1]
-
-
+            #update state with participant's action
             print(f'participant action: {row["item"]}, {row.rot} at {row.grid_val} ')
             print('###')
             p.pos[row['i_item']] = (row.x,row.y,row.rot)
             setpos(p.pos, p.sol)
+
+            #define currently available pieces
+            partial = participant_steps[:i_step + 1]
             for pi in participant_steps.i_item.unique():
                 pos = partial.loc[partial.i_item == pi]
                 if pos.empty:
@@ -369,7 +367,10 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
             available_pieces = [p[0] for p in pieces if p[1]]
 
             #Agent Part - prediction
+
+
             if row['step'] != 100.0:
+
                 max_score += 1
                 p.step = int(row.step)+1
                 print(p.step)
@@ -404,15 +405,15 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
     print(np.mean(acc))
     return acc
 
-def onerun(pzn,params_dict):
+def onerun(pzn,params_dict, kd, kcv):
     states=[]
-    p = Puzzle(pzn,params_dict, path="ACT-R:tangram-solver;models;backtracking-xy-model.lisp")
+    p = Puzzle(pzn,params_dict, path="ACT-R:tangram-solver;models;cognitive-module.lisp")
 
 
     p.path = f'{ROOT_DIR}/puzzle_state.png'
     setpos(p.pos, p.sol, True)
 
-    (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
+    (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step,kd=kd,kcv=kcv)
     p.current_landmarks = puzzle_state_to_imaginal(
         extract, False, True)
     actr.goal_focus('start')
@@ -437,7 +438,7 @@ def onerun(pzn,params_dict):
 
 
 
-        (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step)
+        (extract, problem) = p.extractor.extract(p.path, [x.type for x in p.available_pieces], p.step, kd=kd, kcv=kcv)
 
         if p.status == 'region_backtracking':
             actr.goal_focus('is-backtracking')
@@ -467,28 +468,37 @@ def seq_to_list(step_sequence):
     return converted_steps
 
 
-if __name__ == '__main__':
+if __name__ == '__notmain__':
     # main()
-    results_df = pd.DataFrame(
-        columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
-                 'parallelogram'])
-    to_mat= []
-    for r in range(30):
-        print(f'puzzle {r}')
-        s,step_sequence = onerun(4,{':rt': 2.5, ':mas': 10})
-        to_mat.append(seq_to_list(step_sequence))
+    for puzzleid in [4]:
+        for modeltype in [('balanced',1,3),('vision',0.75,3.25),('freq',1.25,2.75)]:
+            # results_df = pd.DataFrame(
+            #     columns=['run','step','small triangle', 'middle triangle', 'big triangle', 'square',
+            #              'parallelogram'])
+            # to_mat= []
+            #
+            # for r in range(30):
+            #     print(f'puzzle {r}')
+            #     s,step_sequence = onerun(puzzleid,{':rt': 2.5, ':mas': 10},modeltype[1],modeltype[2])
+            #     to_mat.append(seq_to_list(step_sequence))
+            #
+            #     for i in range(len(s)):
+            #         row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
+            #                        'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
+            #         results_df = results_df.append(row,ignore_index=True)
+            #
+            # results_df.to_csv(f'results/model_states_evolution_{puzzleid}_{modeltype[0]}_cnt.csv')
+            # length = max(map(len, to_mat))
+            # mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
+            # np.savetxt(f"results/heatmap_{puzzleid}_{modeltype[0]}_cnt.csv", mat, delimiter=',')
+            prediction_run(2,{':rt': 2.5, ':mas': 10},kd=modeltype[1], kcv=modeltype[2])
 
-        for i in range(len(s)):
-            row = {'run' : r, 'step':(i+1),'small triangle':s[i][0],'middle triangle':s[i][1],
-                           'big triangle':s[i][2],'square':s[i][3],'parallelogram':s[i][4]}
-            results_df = results_df.append(row,ignore_index=True)
-
-    results_df.to_csv('results/model_states_evolution_2_mixed_cnt.csv')
-    length = max(map(len, to_mat))
-    mat = np.array([xi + [0] * (length - len(xi)) for xi in to_mat])
-    np.savetxt("results/heatmap_2_mixed_cnt.csv", mat, delimiter=',')
-    #prediction_run(2,{':rt': 2.5, ':mas': 10},kd=1, kcv=3)
-
+if __name__ == '__main__':
+    for puzzleid in [4]:
+        with open(f'./results/prediction_{puzzleid}.txt', 'w') as out:
+            for modeltype in [('balanced',1,3),('vision',0.75,3.25),('freq',1.25,2.75)]:
+                res = prediction_run(4, {':rt': 2.5, ':mas': 10}, kd=modeltype[1], kcv=modeltype[2])
+                out.write(f'{modeltype}\t{res}\n')
 '''
 ### parameters that can be changed:
 rt, mas, ans

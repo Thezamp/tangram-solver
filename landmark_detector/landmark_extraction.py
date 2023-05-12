@@ -197,7 +197,7 @@ class LandmarkExtractor:
         _, edged_image_bin = cv.threshold(edged_image, 100, 1, cv.THRESH_BINARY)
         edged_image_bin = edged_image_bin | binarized
         cv.imwrite('./utility_pictures/edged.png', edged_image_bin)
-
+        cv.imwrite('./utility_pictures/edged_visible.png', 255*edged_image_bin)
         #extract landmarks
         extracted_landmarks = set()
         placeable_pieces = set()
