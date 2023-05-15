@@ -323,7 +323,8 @@ class Puzzle():
         return ygrid * 5 + xgrid
 
 def prediction_run(pzn,params_dict,kd=1,kcv=2):
-    steps =  pd.read_csv('./datasets/all_steps_test_paper.csv')
+    #steps =  pd.read_csv('./datasets/all_steps_test_paper.csv')
+    steps = pd.read_csv('./datasets/all_steps.csv')
     steps = steps.loc[steps['tangram nr'] == pzn]
 
     acc =[]
@@ -340,7 +341,7 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
         participant_steps = steps.loc[steps.sid == participant]
         pieces = [['BIG-T',True],['BIG-T',True],['MIDDLE-T',True],['SMALL-T',True],['SMALL-T',True],['SQUARE',True],['PARALL',True]]
         p.step = 0
-
+        current_step = 0
         for i_step in range(len(participant_steps)-2):
             p.prediction_answer=[]
             row = participant_steps.iloc[i_step]
@@ -370,9 +371,14 @@ def prediction_run(pzn,params_dict,kd=1,kcv=2):
 
 
             if row['step'] != 100.0:
+            # if True:
+            #     if row['step'] != 100.0:
+            #         current_step =row['step']
+
 
                 max_score += 1
                 p.step = int(row.step)+1
+                # p.step = int(current_step) +1
                 print(p.step)
                 (extract, problem) = p.extractor.extract(p.path, available_pieces, p.step,kd=kd,kcv=kcv)
 
